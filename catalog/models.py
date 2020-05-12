@@ -9,7 +9,7 @@ from django.conf import settings
 class Category(models.Model):
     # Model representing a dish category
     name = models.CharField(("Название категории"),max_length=200, help_text='Введите категорию блюда(например, супы, салаты, пицца и т.д.')
-
+    
     def __str__(self):
         # String for representing the Model object.
         return self.name 
@@ -31,33 +31,34 @@ class Dish(models.Model):
     image = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = '002.jpg')
     description = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
     portionWeight = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
-    category = models.ManyToManyField(Category, help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',related_name='dishes')
+    category = models.ManyToManyField(Category,
+                             help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',related_name='dishes')
 
     class Meta:
         verbose_name_plural = "Блюда"
-   
+    
     '''def get_absolute_image_url(self):
         return os.path.join(settings.MEDIA_URL, self.image.url)'''
     def get_image_url(self, obj):
         return obj.image.url 
     
     
-    def display_category(self):
-        # Creates a string for the Category. This is require to display genre in Admin
-        return ', '.join([category.name for category in self.category.all()[:3]])
+    # def display_category(self):
+    #     # Creates a string for the Category. This is require to display genre in Admin
+    #     return ', '.join([category.name for category in self.category.all()[:3]])
 
-    display_category.short_description = 'Category'
+    # display_category.short_description = 'Category'
 
     def __str__(self):
         # String for representing the Model object.
         return self.title
 
-    def get_absolute_url(self):
-        return reverse("dish-detail", args=[str(self.id)])
+    # def get_absolute_url(self):
+    #     return reverse("dish-detail", args=[str(self.id)])
 
-    def get_image_filename(self, filename):
-         id = self.dish.id 
-         return "dish_images/%s" % (id)
+    # def get_image_filename(self, filename):
+    #      id = self.dish.id 
+    #      return "dish_images/%s" % (id)
 
 
 class DishAdditive(models.Model):
@@ -81,6 +82,9 @@ class DishExtra(models.Model):
 
     class Meta:
         verbose_name_plural = "Дополнительно к блюду"
+    
+    def __str__(self):
+        return self.name
 
 
 class Restaurant(models.Model):

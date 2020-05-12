@@ -68,9 +68,11 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryItemsSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    filter_backends = (SearchFilter,)
-    filterset_fields = ()
-    search_fields = ['dishes__title', 'dishes__description']
+    filter_backends = (SearchFilter, DjangoFilterBackend)
+    search_fields = ['name', 'dishes__title', 'dishes__description']
+    # fiterset_fields = ['dishes__title', 'name']
+    filter_fields = ['name','dishes__title']
+
 
 
     def get(self, request,*args, **kwargs):
@@ -82,7 +84,9 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
 
         # customize the response data
         response.data = {"categories": response.data} 
+        
 
+        
         # return response with this custom representation
         return response 
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from .views import DishDetailView, CategoryListView, DishSearchView
 from .views import  CategoryItemsView, RestaurantView, MenuPageView
 
@@ -11,3 +11,4 @@ urlpatterns = [
     path('menu/', MenuPageView.as_view()),
     path('restaurant/', RestaurantView.as_view())
 ]
+

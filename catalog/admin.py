@@ -9,6 +9,16 @@ class DishExtraInline(admin.TabularInline):
     fk_name = 'dish'
     model = DishExtra
 
+# class DishInline(admin.TabularInline):
+#     model = Dish
+
+
+# class CategoryAdmin(admin.ModelAdmin):
+#     inlines =[
+#         DishInline,
+#     ]
+
+
 class DishAdmin(admin.ModelAdmin):
     inlines = [DishAdditiveInline, DishExtraInline]
 

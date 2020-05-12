@@ -35,13 +35,13 @@ class DishDetailSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Dish
-        fields =  ('id', 'title', 'image', 'price', 'description', 'portionWeight', 'category', 'additives', 'extra')
+        fields =  ('id', 'title', 'image', 'price',  'portionWeight', 'category', 'additives', 'extra')
 
 class DishSearchSerializer(serializers.ModelSerializer):
     category = CategoriesSerializer(many=True, read_only=True)
     class Meta:
         model = Dish
-        fields = ('id', 'title', 'image', 'price', 'description', 'category')
+        fields = ('id', 'title', 'image', 'price',  'category')
     
 class CategoryItemsSerializer(serializers.ModelSerializer):
     
