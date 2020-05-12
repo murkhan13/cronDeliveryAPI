@@ -19,6 +19,7 @@ class Category(models.Model):
         return obj.name
     
     class Meta:
+        verbose_name = "categories"
         verbose_name_plural = "Категории"
 
 from django.urls import reverse

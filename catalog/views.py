@@ -78,17 +78,15 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
     def get(self, request,*args, **kwargs):
         return self.list(request, *args, **kwargs)
     
-    def list(self, request, *args, **kwargs):
-        # call the original 'list' to get the original response
-        response = super(CategoryItemsView, self).list(request, *args, **kwargs) 
+    # def list(self, request, *args, **kwargs):
+    #     # call the original 'list' to get the original response
+    #     response = super(CategoryItemsView, self).list(request, *args, **kwargs) 
 
-        # customize the response data
-        response.data = {"categories": response.data} 
+    #     # customize the response data
+    #     response.data = { "categories": response.data } 
         
-
-        
-        # return response with this custom representation
-        return response 
+    #     # return response with this custom representation
+    #     return response 
 
 
 class RestaurantView(ListModelMixin, GenericAPIView):
