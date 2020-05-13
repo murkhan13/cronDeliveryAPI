@@ -43,7 +43,6 @@ class ValidatePhoneSendOTP(APIView):
             else:
                 key = send_otp(phone)
                 if key:
-                    print(key)
                     old = PhoneOTP.objects.filter(phone__iexact = phone)
                     if old.exists():
                         old = old.first()
@@ -51,25 +50,23 @@ class ValidatePhoneSendOTP(APIView):
                         count = old.count
                         old.count = count + 1
                         old.save()
-                        send_sms(phone, key)
+                        # send_sms(phone, key)
                         return Response({
                             'status': True,
                             'detail': 'OTP sent successfully',
                             'key': key
                         })
-                        print(old.otp)
                     else:
                         PhoneOTP.objects.create(
                             phone = phone,
                             otp = key
                         )
-                        send_sms(phone, key)
+                        # send_sms(phone, key)
                         return Response({
                             'status': True,
                             'detail': 'OTP sent successfully',
                             'key': key
                         }) 
-                        print(phone, key)
                 else:
                     return Response({
                         'status': False,
@@ -81,7 +78,6 @@ class ValidatePhoneSendOTP(APIView):
                 'status': False,
                 'detail': 'Phone number is not given in post request'
             })
-
 
 
 class AuthValidatePhoneSendOTP(APIView):
@@ -104,7 +100,7 @@ class AuthValidatePhoneSendOTP(APIView):
                         count = old.count
                         count += 1
                         old.save() 
-                        send_sms(phone, key)  
+                        # send_sms(phone, key)  
                         return Response({
                                 'status': True,
                                 'detail': 'OTP sent successfully',
@@ -121,7 +117,7 @@ class AuthValidatePhoneSendOTP(APIView):
                             'detail': 'OTP sent successfully',
                             'key': key
                         })
-                        send_sms(phone, key)
+                        # send_sms(phone, key)
                 else:
                     return Response({
                         'status': False,
@@ -146,8 +142,6 @@ def send_otp(phone):
         return key
     else:
         return False
-
-
 
 
 class ValidateOTP(APIView):
@@ -189,13 +183,11 @@ class ValidateOTP(APIView):
             })
 
 
-
 class Register(APIView):
 
     def post(self, request, *args, **kwargs):
         name = request.data.get('name', False)
         phone = request.data.get('phone', False)
-        # password = '123123'
         
         if name and phone :
             old = PhoneOTP.objects.filter(phone__iexact = phone)
@@ -207,7 +199,6 @@ class Register(APIView):
                     temp_data = {
                         'name': name,
                         'phone': phone,
-                        # 'password': password
                     }
                     serializer = CreateUserSerializer(data=temp_data)
                     serializer.is_valid(raise_exception=True)
@@ -225,6 +216,29 @@ class Register(APIView):
             })
 
 
+class Authenticate(APIView):
+    
+    def post(self, request, *args, **kwargs):
+        phone = request.data.get('phone', False)
+        name = request.data.get('name', False)
+        if name and phone :
+            old = PhoneOTP.objects.filter(phone__iexact = phone)
+            if old.exists():
+                old = old.first()
+                validated = old.validated
+                if validated:
+                    old.delete()
+                    return Response({
+                        'status': True,
+                        'detail': 'Logged in.'
+                    })     
+        else: 
+            return Response({
+                'status': False,
+                'detail': 'Both phone and name are not sent'
+            })
+
+
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 
@@ -235,5 +249,3 @@ class LoginAPI(KnoxLoginView):
         login(request,user)
         print("user:",request.user)
         return super().post(request, format=None)
-
-
