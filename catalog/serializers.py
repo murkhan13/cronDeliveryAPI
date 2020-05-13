@@ -72,7 +72,7 @@ class CategoryItemsSerializer(serializers.ModelSerializer):
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Restaurant
-        fields = ( 'title', 'workTime', 'minOrder', 'freeOrder', 'address', 'delivery', 'info')
+        fields = ( 'title', 'workTime', 'minOrder', 'freeOrder', 'address', 'delivery', 'logo', 'info')
     
 
 '''
