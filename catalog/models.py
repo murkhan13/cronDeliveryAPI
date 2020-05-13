@@ -97,12 +97,17 @@ class Restaurant(models.Model):
     address = models.CharField(("Адрес ресторана"),max_length = 200)
     delivery = models.IntegerField(("Стоимость доставки"))
     info = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
+    logo = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
+
 
     class Meta: 
         verbose_name_plural = "Ресторан"
 
     def __str__(self):
         return self.title
+
+    def get_image_url(self, obj):
+        return obj.logo.url 
 
 
 '''

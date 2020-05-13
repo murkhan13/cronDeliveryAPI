@@ -157,7 +157,7 @@ class ValidateOTP(APIView):
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone', False)
         otp_sent = request.data.get('otp', False)
-        print(phone, otp_sent)
+
         if phone and otp_sent:
             old = PhoneOTP.objects.filter(phone__iexact = phone)
             if old.exists():
@@ -188,41 +188,6 @@ class ValidateOTP(APIView):
                 'detail': 'Please provide both phone and otp for validation',
             })
 
-
-class AuthValidateOTP(APIView):
-    
-    # If you have received otp, post a request with phone and that ot and you will be redirected to set the password
-    def post(self, request, *args, **kwargs):
-        phone = request.data.get('phone', False)
-        otp_sent = request.data.get('otp', False)
-
-        if phone and otp_sent:
-            old = PhoneOTP.objects.filter(phone__iexact = phone)
-            if old.exists():
-                old = old.first()
-                otp = old.otp
-                if str(otp_sent) == str(otp):
-                    old.validated = True
-                    old.save()
-                    return Response({
-                        'status': True,
-                        'detail': 'OTP MATCHED. Please proceed for registration'
-                    })
-                else: 
-                    return Response({
-                        'status': False,
-                        'detail': 'OTP INCORRECT'
-                    }) 
-            else: 
-                return Response({
-                    'status': False,
-                    'detail': 'First proceed via sending otp request'
-                })
-        else:
-            return Response({
-                'status': False,
-                'detail': 'Please provide both phone and otp for validation',
-            })
 
 
 class Register(APIView):
@@ -252,8 +217,7 @@ class Register(APIView):
                     return Response({
                         'status': True,
                         'detail': 'Account created'
-                    })
-        
+                    })  
         else:
             return Response({
                 'status': False,
