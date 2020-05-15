@@ -89,7 +89,6 @@ class AuthValidatePhoneSendOTP(APIView):
             phone = str(phone_number)
             user = User.objects.filter(phone__iexact = phone)
             if user.exists():
-                
                 key = send_otp(phone)
                 print('key:', key)
                 if key:
@@ -164,13 +163,11 @@ class ValidateOTP(APIView):
                         'status': True,
                         'detail': 'OTP MATCHED. Please proceed for registration'
                     })
-                
                 else: 
                     return Response({
                         'status': False,
                         'detail': 'OTP INCORRECT'
-                    })
-                
+                    })  
             else: 
                 return Response({
                     'status': False,
@@ -189,26 +186,42 @@ class Register(APIView):
         name = request.data.get('name', False)
         phone = request.data.get('phone', False)
         
-        if name and phone :
-            old = PhoneOTP.objects.filter(phone__iexact = phone)
-            if old.exists():
-                old = old.first()
-                validated = old.validated
 
-                if validated:
-                    temp_data = {
-                        'name': name,
-                        'phone': phone,
-                    }
-                    serializer = CreateUserSerializer(data=temp_data)
-                    serializer.is_valid(raise_exception=True)
-                    user = serializer.save()
-                    old.delete()
-                    
-                    return Response({
+        if name and phone :
+            user = User.objects.filter(phone__iexact = phone)
+        
+            if user.exists():
+                old = PhoneOTP.objects.filter(phone__iexact = phone)
+                if old.exists():
+                    old = old.first()
+                    validated = old.validated
+                    if validated:
+                        old.delete()
+                        return Response({
                         'status': True,
-                        'detail': 'Account created'
-                    })  
+                        'detail': 'Logged in.'
+                        })  
+            else :
+                old = PhoneOTP.objects.filter(phone__iexact = phone)
+                if old.exists():
+                    old = old.first()
+                    validated = old.validated
+
+                    if validated:
+                        temp_data = {
+                            'name': name,
+                            'phone': phone,
+                        }
+                        serializer = CreateUserSerializer(data=temp_data)
+                        serializer.is_valid(raise_exception=True)
+                        user = serializer.save()
+                        old.delete()
+                        
+                        return Response({
+                            'status': True,
+                            'detail': 'Account created'
+                        })  
+            
         else:
             return Response({
                 'status': False,

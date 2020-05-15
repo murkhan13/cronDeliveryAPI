@@ -35,7 +35,7 @@ class DishDetailSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Dish
-        fields =  ('id', 'title', 'image', 'price',  'portionWeight', 'category', 'additives', 'extra')
+        fields =  ('id', 'title', 'image', 'price',  'portionWeight','description', 'category', 'additives', 'extra')
 
 class DishSearchSerializer(serializers.ModelSerializer):
     category = CategoriesSerializer(many=True, read_only=True)
@@ -68,6 +68,18 @@ class CategoryItemsSerializer(serializers.ModelSerializer):
     #     ]})
     #     return ret
     
+
+class CategoryItemsSearchSerializer(serializers.ModelSerializer):
+    
+    dishes = DishListSerializer(many=True, read_only = True)
+    
+    class Meta:
+        model = Category
+        fields =  ['id', 'name', 'dishes']
+    # def to_representation(self, data):
+    #     data = data.filter(dishes__title__icontains=self.context['request'].search, edition__hide=False)
+    #     return super(CategoryItemsSearchSerializer, self).to_representation(data)
+
 
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta: 
