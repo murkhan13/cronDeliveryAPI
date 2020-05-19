@@ -1,12 +1,37 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Dish, Category, Restaurant, DishAdditive, DishExtra
+
+
+from .models import Dish, Category, Restaurant, DishAdditive, DishExtra, Cart
+
+
+class AcoountSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta: 
+        model = User 
+        fields = ('url', 'phone',   'addresses', 'carts')
+        write_only_fields = ('password')
+    
+    def restore_object(self, attrs, instance=None):
+        user = super(AcoountSerializer, self).restore_object(attrs, instance)
+        return user 
+
+
+
+
+
+class CartSerializer(serializers.HyperlinkedModelSerializer):
+    
+    class Meta: 
+        model = Cart
+        fields = ('url', 'items')
 
 
 class DishListSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Dish
-        fields = ('id','title', 'image', 'price')
-
+        fields = ('id','title', 'image', 'price', 'additives', 'extra')
 
 
 class DishAdditivesSerializer(serializers.ModelSerializer):
@@ -17,11 +42,14 @@ class DishAdditivesSerializer(serializers.ModelSerializer):
 
 
 class DishExtrasSerializer(serializers.ModelSerializer):
+    
     class Meta: 
         model = DishExtra
         fields = ('name', 'price', 'active')
 
+
 class CategoriesSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Category
         fields = ('id','name',)
@@ -32,20 +60,28 @@ class DishDetailSerializer(serializers.ModelSerializer):
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
+    if extra: 
+        pass
+    else:
+        extra = {"extra": False}
 
     class Meta: 
         model = Dish
         fields =  ('id', 'title', 'image', 'price',  'portionWeight','description', 'category', 'additives', 'extra')
 
+
 class DishSearchSerializer(serializers.ModelSerializer):
+    
     category = CategoriesSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Dish
         fields = ('id', 'title', 'image', 'price',  'category')
-    
+
+
 class CategoryItemsSerializer(serializers.ModelSerializer):
     
-    dishes = DishListSerializer(many=True, read_only = True)
+    dishes = DishDetailSerializer(many=True, read_only = True)
     
     class Meta:
         model = Category
@@ -76,9 +112,7 @@ class CategoryItemsSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields =  ['id', 'name', 'dishes']
-    # def to_representation(self, data):
-    #     data = data.filter(dishes__title__icontains=self.context['request'].search, edition__hide=False)
-    #     return super(CategoryItemsSearchSerializer, self).to_representation(data)
+    
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
@@ -86,6 +120,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
         model = Restaurant
         fields = ( 'title', 'workTime', 'minOrder', 'freeOrder', 'address', 'delivery', 'logo', 'info')
     
+
+
 
 '''
 class DishDetailSerializer(serializers.ModelSerializer):

@@ -1,6 +1,9 @@
 from django.db import models
 import os
 from django.conf import settings
+from django.contrib.auth.models import User 
+
+from accounts.models import User
 
 
 # Create your models here.
@@ -34,6 +37,19 @@ class Dish(models.Model):
     portionWeight = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
     category = models.ManyToManyField(Category,
                              help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',related_name='dishes')
+    
+
+    def has_related_object(self):
+        has_extra = False
+        try:
+            has_extra = (self.extra is not None)
+        except DishExtra.DoesNotExist:
+            pass
+        return has_extra and (self.car is not None)
+    
+    
+    
+    
 
     class Meta:
         verbose_name_plural = "Блюда"
@@ -43,12 +59,6 @@ class Dish(models.Model):
     def get_image_url(self, obj):
         return obj.image.url 
     
-    
-    # def display_category(self):
-    #     # Creates a string for the Category. This is require to display genre in Admin
-    #     return ', '.join([category.name for category in self.category.all()[:3]])
-
-    # display_category.short_description = 'Category'
 
     def __str__(self):
         # String for representing the Model object.
@@ -56,11 +66,15 @@ class Dish(models.Model):
 
     # def get_absolute_url(self):
     #     return reverse("dish-detail", args=[str(self.id)])
+    def has_related_object(self):
+        has_extra = False
+        try:
+            has_extra = (self.extra is not None)
+        except DishExtra.DoesNotExist:
+            pass
+        return has_extra and (self.car is not None)
 
-    # def get_image_filename(self, filename):
-    #      id = self.dish.id 
-    #      return "dish_images/%s" % (id)
-
+    
 
 class DishAdditive(models.Model):
     dish = models.ForeignKey(Dish, on_delete=models.CASCADE,related_name="additives", default='')
@@ -88,6 +102,14 @@ class DishExtra(models.Model):
         return self.name
 
 
+
+# for dish in Dish.objects.all():
+#     if not dish.extra.filter(id=id).exists():
+#         dish.ext = False
+#     else:
+#         pass
+
+
 class Restaurant(models.Model):
     #categories = models.ForeignKey(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
     title = models.CharField(("Название ресторана"),max_length = 200)
@@ -110,13 +132,17 @@ class Restaurant(models.Model):
         return obj.logo.url 
 
 
-'''
+class Cart(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=255, blank=True, null=True)
+    user = models.ForeignKey('accounts.User', related_name="carts", on_delete=models.CASCADE)
+    items = models.ManyToManyField('Dish')
 
-class DishDetails(models.Model):
 
-     dish = models.ForeignKey(Dish, on_delete = models.CASCADE, related_name = 'images')
-     images = models.ImageField(upload_to="dishes_imgs")
+class Address(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey('accounts.User', related_name="addresses", on_delete=models.CASCADE)
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255, blank=True, null=True)
 
-     def get_absolute_image_url(self):
-        return os.path.join(settings.MEDIA_URL, self.images.url)
- '''

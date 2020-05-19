@@ -81,12 +81,12 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
         return self.list(request, *args, **kwargs)
 
 
-class CategoryFilter(rest_filters.FilterSet):
-    dishes = CharFilter(field_name='dishes__title', lookup_expr='icontains')
+# class CategoryFilter(rest_filters.FilterSet):
+#     dishes = CharFilter(field_name='category__dishes__title', lookup_expr='icontains')
 
-    class Meta:
-        model = Category
-        fields = ['dishes__title', 'name']
+#     class Meta:
+#         model = Category
+#         fields = ['category__dishes__title', 'name']
 
 
 
@@ -95,8 +95,8 @@ class CategoryItemsSearchView(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryItemsSearchSerializer
     filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
-    filterset_class = CategoryFilter
-    search_fields = ['dishes__title', 'name']
+    # filterset_class = CategoryFilter
+    search_fields = ['name','dishes__title' ]
 
     
     # def get_queryset(self):
