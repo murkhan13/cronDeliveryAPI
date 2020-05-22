@@ -134,9 +134,31 @@ class Restaurant(models.Model):
 
 class Cart(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=255, blank=True, null=True)
     user = models.ForeignKey('accounts.User', related_name="carts", on_delete=models.CASCADE)
-    items = models.ManyToManyField('Dish')
+    items = models.ManyToManyField(Dish, through='CartItem')
+
+    def __str__(self):
+        return str(self.id)
+
+
+# class CartItem(models.Model):
+#     dish = models.ForeignKey('Dish', on_delete=models.CASCADE)
+#     quantity = models.IntegerField(default=1)
+#     cart = models.ForeignKey('Cart', on_delete=models.CASCADE)
+
+#     def __str__(self):
+#         return str(self.id)
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.cart.id 
+
 
 
 class Address(models.Model):

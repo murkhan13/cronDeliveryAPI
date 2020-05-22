@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 
-from .models import Dish, Category, Restaurant, DishAdditive, DishExtra, Cart
+from .models import Dish, Category, Restaurant, DishAdditive, DishExtra, Cart, CartItem
 
 
 class AcoountSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,14 +17,35 @@ class AcoountSerializer(serializers.HyperlinkedModelSerializer):
         return user 
 
 
+class CartSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
 
-
-
-class CartSerializer(serializers.HyperlinkedModelSerializer):
-    
-    class Meta: 
+    class Meta:
         model = Cart
-        fields = ('url', 'items')
+        fields = '__all__'
+
+    @staticmethod
+    def get_product(obj):
+        return obj.product.title 
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    item = serializers.SerializerMethodField()
+    item_title = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CartItem
+        fields = [
+            "item",
+            "item_title",
+            "price", 
+            "product",
+            
+        ]
+
+
 
 
 class DishListSerializer(serializers.ModelSerializer):
@@ -107,7 +128,7 @@ class CategoryItemsSerializer(serializers.ModelSerializer):
 
 class CategoryItemsSearchSerializer(serializers.ModelSerializer):
     
-    dishes = DishListSerializer(many=True, read_only = True)
+    dishes = DishDetailSerializer(many=True, read_only = True)
     
     class Meta:
         model = Category
