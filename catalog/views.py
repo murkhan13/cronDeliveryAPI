@@ -301,13 +301,13 @@ class CartView(APIView):
         #     })
             
 
-        existing_cart_item = CartItem.objects.filter(cart=cart, dish=dish, additives__name=additives, extra__name=extra).first()
-
+        existing_cart_item = CartItem.objects.filter(cart=cart, dish=dish, additives=additives, extra=extra).first()
+ 
         if existing_cart_item:
             existing_cart_item.quantity += quantity
             existing_cart_item.save()
         else: 
-            new_cart_item = CartItem(cart=cart, dish=dish, additives__name=additives, extra__name=extra, quantity=quantity)
+            new_cart_item = CartItem(cart=cart, dish=dish, additives=additives, extra=extra, quantity=quantity)
             new_cart_item.save()
 
         serializer = CartSerializer(cart)
