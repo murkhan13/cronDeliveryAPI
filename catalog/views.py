@@ -1,14 +1,19 @@
 from django.shortcuts import render
 from django.db.models import Q , FilteredRelation
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin 
-from .serializers import CategoriesSerializer, CategoryItemsSerializer,CategoryItemsSearchSerializer,  DishSearchSerializer, DishListSerializer
-from .serializers import DishDetailSerializer, RestaurantSerializer,DishAdditivesSerializer
-from .models import Dish, Category, Restaurant , DishAdditive     #DishDetails
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from .serializers import *
+from .models import *
+# from rest_framework.decorators import detail_route
+# from rest_framework.decorators import list_route
+# from rest_framework.authentication import TokenAuthentication
+from knox.auth import TokenAuthentication
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
+from django.shortcuts import get_object_or_404
+
 import json
 from django_filters import rest_framework as rest_filters, NumberFilter, CharFilter
 from rest_framework import filters
@@ -196,12 +201,6 @@ class CategoryItemsSearchView(ListAPIView):
     #     return Response(category_serializer_data) 
 
         
-
-   
-
-
-
-
 class RestaurantView(ListModelMixin, GenericAPIView):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
@@ -246,3 +245,153 @@ class MenuPageView(RestaurantView, CategoryItemsView, ListModelMixin, GenericAPI
 
         # return custom representation of data
         return Response(response)
+
+
+class CartView(APIView):
+    serializer_class = CartSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
+
+
+    def get(self, request):
+        cart = Cart.objects.filter(user=self.request.user)
+        serializer = CartSerializer(cart, many=True)
+        return Response({"cart": serializer.data})
+    
+    def post(self, request, pk=None):
+        cart = Cart.objects.filter(user=self.request.user)
+        # quantity = int(request.data.get('quantity'))
+        # dish = Dish.objects.filter(
+        #         id=request.data.get('dish_id')
+        #     ).first()
+        # print(quantity)
+        # print(dish)
+        try:
+            dish = Dish.objects.get(
+                id=request.data.get('dish_id')
+            )
+            additives = DishAdditive.objects.get(
+                id=request.data.get('additives_id')
+            )
+            extra = DishExtra.objects.get(
+                id=request.data.get('extra_id')
+            )
+            quantity = int(request.data.get('quantity'))   
+            if dish:
+                print(dish)
+                print(additives)
+                print(extra)
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': False,
+                'detail': "objects none"
+            })
+        # try: 
+            
+        # except Exception as e:
+        #     print(e)
+        #     return Response({
+        #         'detail': "objects none", 
+        #         'status': False,
+                
+        #     })
+            
+
+        existing_cart_item = CartItem.objects.filter(cart=cart, dish=dish, additives__name=additives, extra__name=extra).first()
+
+        if existing_cart_item:
+            existing_cart_item.quantity += quantity
+            existing_cart_item.save()
+        else: 
+            new_cart_item = CartItem(cart=cart, dish=dish, additives__name=additives, extra__name=extra, quantity=quantity)
+            new_cart_item.save()
+
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
+    
+
+    def put(self, request, pk):
+        cart = self.get_object()
+        try:
+            cartitem_id = request.data['cartitem_id']
+            dish = Dish.objects.get(
+                pk=request.data['dish_id']
+            )
+            '''additives = {}
+            adds_ids = request.data['additives_id']
+            for add_id in adds_ids:
+                add = DishAdditive.objects.get(pk=add_id)
+                additives.append(add)'''
+            additives = DishAdditive.objects.get(
+                pk = request.data['additives_id']
+            )
+            extra = DishExtra.objects.get(
+                pk = request.data['extra_id']
+            )
+            quantity = int(request.data['quantity'])
+        except Exception as e :
+            print(e)
+            return Response({
+                'status': False 
+            })
+        
+        saved_cart_item = CartItem.objects.filter(id=cartitem_id)
+        if saved_cart_item:
+            saved_cart_item = CartItem(cart=cart, dish=dish, additives=additives, extra=extra, quantity=quantity)
+            saved_cart_item.save()
+        else: 
+            return Response({
+                'status': False 
+            })
+    
+    def delete(self, request, pk):
+        cart = self.get_object()
+
+        try: 
+            dish = Dish.objects.get(
+               pk=request.data['product_id']
+            )
+            additives = DishAdditive.objects.get(
+                pk = request.data['additives_id']
+            )
+            extra = DishExtra.objects.get(
+                pk = request.data['extra_id']
+            )
+            quantity = int(request.data['quantity'])
+        except Exception as e :
+            print(e)
+            return Response({
+                'status': False 
+            })
+        try: 
+            cart_item = CartItem.objects.get(cart=cart, dish=dish, additives=additives, extra=extra)
+        except Exception as e:
+            print(e)
+            return Response({
+                'status': False
+            })
+        
+        if cart_item.quantity == quantity:
+            cart_item.delete()
+        else:
+            cart_item.quantity -= quantity
+            cart_item.save()
+        
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
+        
+        
+
+
+class CartItemView(APIView):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
+
+
+
+
+

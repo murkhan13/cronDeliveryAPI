@@ -138,14 +138,3 @@ class CategoryItemsSearchView(ListModelMixin, GenericAPIView):
                     "id": 3,
                     "title": "Запеченный судак",
                     "price": 450,
-                },
-                 {
-                    "id": 3,
-                    "title": "Роллы филадельфия",
-                    "price": 450,
-                }, 
-                ...
-               ]
-        }
-        ...
-               ],

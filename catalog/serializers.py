@@ -1,49 +1,67 @@
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework import serializers
-
+from accounts.models import User
 
 from .models import Dish, Category, Restaurant, DishAdditive, DishExtra, Cart, CartItem
 
 
-class AcoountSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta: 
         model = User 
-        fields = ('url', 'phone',   'addresses', 'carts')
-        write_only_fields = ('password')
+        fields = '__all__'
     
-    def restore_object(self, attrs, instance=None):
-        user = super(AcoountSerializer, self).restore_object(attrs, instance)
-        return user 
+    # def restore_object(self, attrs, instance=None):
+    #     user = super(AcoountSerializer, self).restore_object(attrs, instance)
+    #     return user 
 
+
+class DishSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Dish
+        fields = (
+            'id', 
+            'title', 
+            'price',
+            'image', 
+            'description', 
+            'portionWeight',
+            'category', 
+        )
 
 class CartSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
+    # items = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Cart
-        fields = '__all__'
+        fields = (
+            'id', 
+            'user', 
+            'created_at',
+            'updated_at', 
+            # 'items'
+        )
 
     @staticmethod
     def get_product(obj):
-        return obj.product.title 
+        return obj.dish.title 
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    item = serializers.SerializerMethodField()
-    item_title = serializers.SerializerMethodField()
-    product = serializers.SerializerMethodField()
-    price = serializers.SerializerMethodField()
+    cart = CartSerializer(read_only=True)
+    dish = DishSerializer(read_only=True)
 
     class Meta:
         model = CartItem
-        fields = [
-            "item",
-            "item_title",
-            "price", 
-            "product",
-            
-        ]
+        fields = (
+            'id', 
+            'cart', 
+            'dish', 
+            'additives', 
+            'extra', 
+            'quantity'
+        )
 
 
 
@@ -59,14 +77,14 @@ class DishAdditivesSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = DishAdditive
-        fields = ('name', 'addPrice', 'active')
+        fields = ('id', 'name', 'addPrice', 'active')
 
 
 class DishExtrasSerializer(serializers.ModelSerializer):
     
     class Meta: 
         model = DishExtra
-        fields = ('name', 'price', 'active')
+        fields = ('id', 'name', 'price', 'active')
 
 
 class CategoriesSerializer(serializers.ModelSerializer):

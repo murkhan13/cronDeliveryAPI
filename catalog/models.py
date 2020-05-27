@@ -1,7 +1,7 @@
+from __future__ import unicode_literals
 from django.db import models
 import os
 from django.conf import settings
-from django.contrib.auth.models import User 
 
 from accounts.models import User
 
@@ -38,19 +38,7 @@ class Dish(models.Model):
     category = models.ManyToManyField(Category,
                              help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',related_name='dishes')
     
-
-    def has_related_object(self):
-        has_extra = False
-        try:
-            has_extra = (self.extra is not None)
-        except DishExtra.DoesNotExist:
-            pass
-        return has_extra and (self.car is not None)
     
-    
-    
-    
-
     class Meta:
         verbose_name_plural = "Блюда"
     
@@ -133,10 +121,18 @@ class Restaurant(models.Model):
 
 
 class Cart(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('accounts.User', related_name="carts", on_delete=models.CASCADE)
-    items = models.ManyToManyField(Dish, through='CartItem')
+    user = models.ForeignKey(
+        User, 
+        related_name="cart", 
+        on_delete=models.CASCADE
+        )
+    
 
+    # items = models.ManyToManyField(Dish, through='CartItem')
+    created_at  = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    
     def __str__(self):
         return str(self.id)
 
@@ -151,16 +147,28 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
+    cart = models.ForeignKey(
+        Cart, 
+        on_delete=models.CASCADE,
+        related_name='items', 
+        null=True,
+        blank=True
+        )
+    dish = models.ForeignKey(
+        Dish, 
+        on_delete=models.CASCADE
+        )
+    additives = models.ManyToManyField(DishAdditive)
+    extra = models.ManyToManyField(DishExtra)
     quantity = models.PositiveIntegerField(default=1)
     total = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.cart.id 
-
-
-
+    def __unicode__(self):
+        return '%s: %s' %(self.dish.title, self.quantity)
+    
+    
 class Address(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey('accounts.User', related_name="addresses", on_delete=models.CASCADE)
