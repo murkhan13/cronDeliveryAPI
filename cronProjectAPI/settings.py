@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'ps7(e&!!l(kbsmr$76qia@(zi%p=^w
 DEBUG = bool( os.environ.get('DJANGO_DEBUG', True) )
 
 ALLOWED_HOSTS = [
-    'mein-r1an-frau.herokuapp.com',
+    'delivery-api-cron.herokuapp.com',
     '127.0.0.1'
 ]
 
