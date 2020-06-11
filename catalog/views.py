@@ -348,13 +348,15 @@ class CartItemEditView(APIView):
             )
             extra_list = request.POST.getlist('extra_id')
             quantity = int(request.data['quantity'])
-        except Exception as e :
+        except Exception as e:
             print(e)
             return Response({
                 'status': False ,
                 'detail': "Ошибка запроса при изменении товаров в корзине"
             })
-            
+        
+        cartitem.quantity = quantity
+        cartitem.save()
         cartitem.additives.clear()
         cartitem.extra.clear()
 
@@ -363,7 +365,6 @@ class CartItemEditView(APIView):
         for extra in extra_list:
             obj = DishExtra.objects.get(pk=extra)
             cartitem.extra.add(obj)
-
 
         user_cart = Cart.objects.filter(user=self.request.user)
 
@@ -381,7 +382,7 @@ class CartItemDeleteView(APIView):
             cartitem = CartItem.objects.get(
                 pk=request.data['cartitem_id']
             )
-        except: 
+        except:
             return Response({
                 "status": False,
                 "detail": "Товар по такому id не найден"
