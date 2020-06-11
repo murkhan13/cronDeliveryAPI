@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from accounts.models import User
 
-from .models import Dish, Category, Restaurant, DishAdditive, DishExtra, Cart, CartItem
+from .models import *
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -29,49 +29,6 @@ class DishSerializer(serializers.ModelSerializer):
             'category', 
         )
 
-class CartSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    # items = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        model = Cart
-        fields = (
-            'id', 
-            'user', 
-            'created_at',
-            'updated_at', 
-            # 'items'
-        )
-
-    @staticmethod
-    def get_product(obj):
-        return obj.dish.title 
-
-
-class CartItemSerializer(serializers.ModelSerializer):
-    cart = CartSerializer(read_only=True)
-    dish = DishSerializer(read_only=True)
-
-    class Meta:
-        model = CartItem
-        fields = (
-            'id', 
-            'cart', 
-            'dish', 
-            'additives', 
-            'extra', 
-            'quantity'
-        )
-
-
-
-
-class DishListSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Dish
-        fields = ('id','title', 'image', 'price', 'additives', 'extra')
-
 
 class DishAdditivesSerializer(serializers.ModelSerializer):
     
@@ -87,6 +44,20 @@ class DishExtrasSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'price', 'active')
 
 
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    
+    class Meta: 
+        model = User 
+        fields = '__all__'
+
+
+class DishListSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Dish
+        fields = ('id','title', 'image', 'price', 'additives', 'extra')
+
+
 class CategoriesSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -95,18 +66,55 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class DishDetailSerializer(serializers.ModelSerializer):
-    #dish_details = DishDetailSerializer(many = True, read_only = True)
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
-    if extra: 
-        pass
-    else:
-        extra = {"extra": False}
+    
 
     class Meta: 
         model = Dish
         fields =  ('id', 'title', 'image', 'price',  'portionWeight','description', 'category', 'additives', 'extra')
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+
+    # dish = DishDetailSerializer(read_only=True)
+    image = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+    category    = CategoriesSerializer(many=True, read_only=True)
+    additives   = DishAdditivesSerializer(many=True,read_only=True)
+    extra       = DishExtrasSerializer(many=True,read_only=True)
+
+
+    # def to_internal_value(self, data):
+    #     cart_data = data['cart']
+    #     return super().to_internal_value(cart_data)
+
+    class Meta:
+        model = CartItem
+        fields = (
+            'id', 
+            'cart',
+            'title', 
+            'price',
+            'image', 
+            'description',
+            'portionWeight',
+            'category',
+            'additives', 
+            'extra', 
+            'quantity'
+        )
+
+    def create(self, validated_data):
+        pass
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ('id', 'user', 'items')
 
 
 class DishSearchSerializer(serializers.ModelSerializer):
@@ -126,23 +134,6 @@ class CategoryItemsSerializer(serializers.ModelSerializer):
         model = Category
         fields =  ['id', 'name', 'dishes']
     
-    # def to_representation(self, instance):
-    #      # instance is the model object. create the custom json format by accessing instance attributes normaly and return it
-    #     categories = dict()
-
-    #     representation = {'categories': [instance]  } 
-
-    #     return representation
-    
-        
-    # def to_representation(self, data):
-    #     defaultDict = data
-    #     ret = []
-    #     ret.append({ "categories": [
-    #         defaultDict
-    #     ]})
-    #     return ret
-    
 
 class CategoryItemsSearchSerializer(serializers.ModelSerializer):
     
@@ -153,14 +144,11 @@ class CategoryItemsSearchSerializer(serializers.ModelSerializer):
         fields =  ['id', 'name', 'dishes']
     
 
-
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Restaurant
         fields = ( 'title', 'workTime', 'minOrder', 'freeOrder', 'address', 'delivery', 'logo', 'info')
     
-
-
 
 '''
 class DishDetailSerializer(serializers.ModelSerializer):

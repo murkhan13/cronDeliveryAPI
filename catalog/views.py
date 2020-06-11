@@ -5,9 +5,9 @@ from rest_framework.views import APIView
 from rest_framework.mixins import ListModelMixin 
 from .serializers import *
 from .models import *
+from django.shortcuts import get_object_or_404
 # from rest_framework.decorators import detail_route
 # from rest_framework.decorators import list_route
-# from rest_framework.authentication import TokenAuthentication
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -98,7 +98,7 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
 class CategoryItemsSearchView(ListAPIView):
     permission_classes = [AllowAny, ]
     queryset = Category.objects.all()
-    serializer_class = CategoryItemsSearchSerializer
+    serializer_class = CategoryItemsSearchSerializer 
     filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
     # filterset_class = CategoryFilter
     search_fields = ['name','dishes__title' ]
@@ -247,7 +247,7 @@ class MenuPageView(RestaurantView, CategoryItemsView, ListModelMixin, GenericAPI
         return Response(response)
 
 
-class CartView(APIView):
+class CartItemAddView(APIView):
     serializer_class = CartSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -261,137 +261,136 @@ class CartView(APIView):
         serializer = CartSerializer(cart, many=True)
         return Response({"cart": serializer.data})
     
+
     def post(self, request, pk=None):
-        cart = Cart.objects.filter(user=self.request.user)
-        # quantity = int(request.data.get('quantity'))
-        # dish = Dish.objects.filter(
-        #         id=request.data.get('dish_id')
-        #     ).first()
-        # print(quantity)
-        # print(dish)
+
+        try:
+            cart = Cart.objects.get(user=self.request.user)
+        except:
+            cart = Cart.objects.create(user=self.request.user)
+            cart.save()
+
         try:
             dish = Dish.objects.get(
-                id=request.data.get('dish_id')
+                pk=request.data['dish_id']
             )
+            dish_id = int(request.data.get('dish_id'))
             additives = DishAdditive.objects.get(
-                id=request.data.get('additives_id')
+                id=request.data['additives_id']
             )
-            extra = DishExtra.objects.get(
-                id=request.data.get('extra_id')
-            )
+            extra_list = request.POST.getlist('extra_id')
             quantity = int(request.data.get('quantity'))   
-            if dish:
-                print(dish)
-                print(additives)
-                print(extra)
+            
         except Exception as e:
             print(e)
             return Response({
                 'status': False,
-                'detail': "objects none"
+                'detail': "Ошибка при добавлении в корзину"
             })
-        # try: 
-            
-        # except Exception as e:
-        #     print(e)
-        #     return Response({
-        #         'detail': "objects none", 
-        #         'status': False,
-                
-        #     })
-            
+        
+        # extra_list = [int(s) for s in extra_id.split(',')]
 
-        existing_cart_item = CartItem.objects.filter(cart=cart, dish=dish, additives=additives, extra=extra).first()
- 
-        if existing_cart_item:
-            existing_cart_item.quantity += quantity
-            existing_cart_item.save()
-        else: 
-            new_cart_item = CartItem(cart=cart, dish=dish, additives=additives, extra=extra, quantity=quantity)
-            new_cart_item.save()
-
-        serializer = CartSerializer(cart)
-        return Response(serializer.data)
-    
-
-    def put(self, request, pk):
-        cart = self.get_object()
+        # print('https://mein-r1an-frau.herokuapp.com' + dish.image.url, category.values(), additives)
+        
         try:
-            cartitem_id = request.data['cartitem_id']
-            dish = Dish.objects.get(
-                pk=request.data['dish_id']
-            )
-            '''additives = {}
-            adds_ids = request.data['additives_id']
-            for add_id in adds_ids:
-                add = DishAdditive.objects.get(pk=add_id)
-                additives.append(add)'''
-            additives = DishAdditive.objects.get(
-                pk = request.data['additives_id']
-            )
-            extra = DishExtra.objects.get(
-                pk = request.data['extra_id']
-            )
-            quantity = int(request.data['quantity'])
-        except Exception as e :
-            print(e)
-            return Response({
-                'status': False 
-            })
-        
-        saved_cart_item = CartItem.objects.filter(id=cartitem_id)
-        if saved_cart_item:
-            saved_cart_item = CartItem(cart=cart, dish=dish, additives=additives, extra=extra, quantity=quantity)
-            saved_cart_item.save()
-        else: 
-            return Response({
-                'status': False 
-            })
-    
-    def delete(self, request, pk):
-        cart = self.get_object()
+            existing_cart_item = CartItem.objects.get(cart=cart.id, title=dish.title)
+        except:
+            existing_cart_item = None
+        # print(existing_cart_item)
 
-        try: 
-            dish = Dish.objects.get(
-               pk=request.data['product_id']
-            )
-            additives = DishAdditive.objects.get(
-                pk = request.data['additives_id']
-            )
-            extra = DishExtra.objects.get(
-                pk = request.data['extra_id']
-            )
-            quantity = int(request.data['quantity'])
-        except Exception as e :
-            print(e)
-            return Response({
-                'status': False 
-            })
-        try: 
-            cart_item = CartItem.objects.get(cart=cart, dish=dish, additives=additives, extra=extra)
-        except Exception as e:
-            print(e)
-            return Response({
-                'status': False
-            })
-        
-        if cart_item.quantity == quantity:
-            cart_item.delete()
+        if existing_cart_item is not None:
+            existing_cart_item.quantity = quantity
+            existing_cart_item.save()
+            # existing_cart_item.delete()
+            # print(existing_cart_item.cart)
         else:
-            cart_item.quantity -= quantity
-            cart_item.save()
+            new_cart_item = CartItem.objects.create( 
+                cart=cart,
+                title=dish.title,
+                price=dish.price,
+                image=dish.image,
+                description=dish.description,
+                portionWeight=dish.portionWeight,
+                quantity = quantity
+            )
+
+            new_cart_item.save()
+            # new_cart_item.dish.additives.filter(pk=request.data['additives_id'])
+            category = dish.category
+            for cat in category.values():
+                obj = Category.objects.get(name=cat["name"])
+                new_cart_item.category.add(obj)
+
+            new_cart_item.additives.add(additives)
+
+            for extra in extra_list:
+                obj = DishExtra.objects.get(pk=extra)
+                new_cart_item.extra.add(obj)
+                
+        user_cart = Cart.objects.filter(user=self.request.user)
         
-        serializer = CartSerializer(cart)
-        return Response(serializer.data)
+        serializer = CartSerializer(user_cart, many=True)
+        return Response({
+            "cart": serializer.data
+        })
         
-        
+             
+class CartItemEditView(APIView):
+
+    def post(self,request,pk=None):
+
+        try:
+            cartitem = CartItem.objects.get(
+                pk=request.data['cartitem_id']
+            )
+            additives = DishAdditive.objects.get(
+                pk = request.data['additives_id']
+            )
+            extra_list = request.POST.getlist('extra_id')
+            quantity = int(request.data['quantity'])
+        except Exception as e :
+            print(e)
+            return Response({
+                'status': False ,
+                'detail': "Ошибка запроса при изменении товаров в корзине"
+            })
+            
+        cartitem.additives.clear()
+        cartitem.extra.clear()
+
+        cartitem.additives.add(additives)
+
+        for extra in extra_list:
+            obj = DishExtra.objects.get(pk=extra)
+            cartitem.extra.add(obj)
 
 
-class CartItemView(APIView):
-    queryset = CartItem.objects.all()
-    serializer_class = CartItemSerializer
+        user_cart = Cart.objects.filter(user=self.request.user)
+
+        serializer = CartSerializer(user_cart, many=True)
+        return Response({
+            "cart": serializer.data
+        })
 
 
+class CartItemDeleteView(APIView):
 
+    def post(self, request, pk=None):
 
+        try:
+            cartitem = CartItem.objects.get(
+                pk=request.data['cartitem_id']
+            )
+        except: 
+            return Response({
+                "status": False,
+                "detail": "Товар по такому id не найден"
+            })
 
+        cartitem.delete()
+
+        user_cart = Cart.objects.filter(user=self.request.user)
+        serializer = CartSerializer(user_cart, many=True)
+        return Response({
+            "cart": serializer.data
+        })

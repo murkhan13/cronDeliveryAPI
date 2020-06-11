@@ -1,12 +1,12 @@
+
 from __future__ import unicode_literals
-from django.db import models
 import os
+from django.db import models
 from django.conf import settings
 
 from accounts.models import User
 
 
-# Create your models here.
 
 
 class Category(models.Model):
@@ -30,12 +30,12 @@ from django.urls import reverse
 
 class Dish(models.Model):
     #Model representing a dish to order 
-    title = models.CharField(("Навзание блюда"),max_length = 200, help_text='Назовите блюдо')
-    price = models.IntegerField(("Цена блюда"),help_text = 'Укажите цену')
-    image = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = '002.jpg')
-    description = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
-    portionWeight = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
-    category = models.ManyToManyField(Category,
+    title           = models.CharField(("Навзание блюда"),max_length = 200, help_text='Назовите блюдо')
+    price           = models.IntegerField(("Цена блюда"),help_text = 'Укажите цену')
+    image           = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = '002.jpg')
+    description     = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
+    portionWeight   = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
+    category        = models.ManyToManyField(Category,
                              help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',related_name='dishes')
     
     
@@ -65,10 +65,10 @@ class Dish(models.Model):
     
 
 class DishAdditive(models.Model):
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE,related_name="additives", default='')
-    name = models.CharField(("Название добавки"),help_text="укажите название", max_length=200, default = "")
-    addPrice = models.IntegerField(("Цена"),help_text="укажите цену")
-    active = models.BooleanField(("Добавить"))
+    dish        = models.ForeignKey(Dish, on_delete=models.CASCADE,related_name="additives", default='')
+    name        = models.CharField(("Название добавки"),help_text="укажите название", max_length=200, default = "")
+    addPrice    = models.IntegerField(("Цена"),help_text="укажите цену")
+    active      = models.BooleanField(("Добавить"))
 
     class Meta: 
          verbose_name_plural = "Добавки к блюду"
@@ -78,10 +78,10 @@ class DishAdditive(models.Model):
     
 
 class DishExtra(models.Model):
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name="extra", default='')
-    name = models.CharField(("Дополнительно"),help_text="укажите дополнительные продукты к блюду",  max_length=200)
-    price = models.IntegerField(("Цена"), help_text="укажите цену" )
-    active = models.BooleanField("Добавить")
+    dish    = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name="extra", default='')
+    name    = models.CharField(("Дополнительно"),help_text="укажите дополнительные продукты к блюду",  max_length=200)
+    price   = models.IntegerField(("Цена"), help_text="укажите цену" )
+    active  = models.BooleanField("Добавить")
 
     class Meta:
         verbose_name_plural = "Дополнительно к блюду"
@@ -91,23 +91,16 @@ class DishExtra(models.Model):
 
 
 
-# for dish in Dish.objects.all():
-#     if not dish.extra.filter(id=id).exists():
-#         dish.ext = False
-#     else:
-#         pass
-
-
 class Restaurant(models.Model):
     #categories = models.ForeignKey(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
-    title = models.CharField(("Название ресторана"),max_length = 200)
-    workTime = models.CharField(("График работы"),max_length = 200, help_text='укажите ') 
-    minOrder = models.IntegerField(("Средний чек"),help_text='Минимальный заказ')
-    freeOrder = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
-    address = models.CharField(("Адрес ресторана"),max_length = 200)
-    delivery = models.IntegerField(("Стоимость доставки"))
-    info = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
-    logo = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
+    title       = models.CharField(("Название ресторана"),max_length = 200)
+    workTime    = models.CharField(("График работы"),max_length = 200, help_text='укажите ') 
+    minOrder    = models.IntegerField(("Минимальный заказ"),help_text='Минимальный заказ')
+    freeOrder   = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
+    address     = models.CharField(("Адрес ресторана"),max_length = 200)
+    delivery    = models.IntegerField(("Стоимость доставки"))
+    info        = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
+    logo        = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
 
 
     class Meta: 
@@ -120,59 +113,48 @@ class Restaurant(models.Model):
         return obj.logo.url 
 
 
+
 class Cart(models.Model):
     user = models.ForeignKey(
-        User, 
-        related_name="cart", 
-        on_delete=models.CASCADE
+        User,
+        related_name="cart",
+        on_delete=models.CASCADE,
+        default=None
         )
+    # dish = models.ForeignKey(Dish, on_delete=models.CASCADE, blank=True, null=True)
+    # additives = models.ManyToManyField(DishAdditive)#, on_delete=models.CASCADE, blank=True, null=True)
+    # extra = models.ManyToManyField(DishExtra)
+    # quantity = models.PositiveIntegerField(default=1)
     
-
-    # items = models.ManyToManyField(Dish, through='CartItem')
-    created_at  = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    
-    def __str__(self):
-        return str(self.id)
-
-
-# class CartItem(models.Model):
-#     dish = models.ForeignKey('Dish', on_delete=models.CASCADE)
-#     quantity = models.IntegerField(default=1)
-#     cart = models.ForeignKey('Cart', on_delete=models.CASCADE)
-
-#     def __str__(self):
-#         return str(self.id)
+    def __unicode__(self):
+        return '%s: %s' %(self.dish.title, self.quantity)
 
 
 class CartItem(models.Model):
     cart = models.ForeignKey(
-        Cart, 
+        Cart,
         on_delete=models.CASCADE,
-        related_name='items', 
         null=True,
-        blank=True
-        )
-    dish = models.ForeignKey(
-        Dish, 
-        on_delete=models.CASCADE
-        )
-    additives = models.ManyToManyField(DishAdditive)
-    extra = models.ManyToManyField(DishExtra)
-    quantity = models.PositiveIntegerField(default=1)
-    total = models.DecimalField(max_digits=10, decimal_places=2)
+        blank=True,
+        related_name='items'
+    )
 
-    def __str__(self):
-        return self.cart.id 
-    def __unicode__(self):
-        return '%s: %s' %(self.dish.title, self.quantity)
+    title           = models.CharField(("Навзание блюда"),max_length = 200, help_text='Назовите блюдо')
+    price           = models.IntegerField(("Цена блюда"),help_text = 'Укажите цену')
+    image           = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = '002.jpg')
+    description     = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
+    portionWeight   = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
+    category        = models.ManyToManyField(Category,
+                             help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS')
+    additives       = models.ManyToManyField(DishAdditive)
+    extra           = models.ManyToManyField(DishExtra)
+ 
+    quantity        = models.PositiveIntegerField(default=1)
     
     
 class Address(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey('accounts.User', related_name="addresses", on_delete=models.CASCADE)
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255, blank=True, null=True)
-
+    date_created    = models.DateTimeField(auto_now_add=True)
+    user            = models.ForeignKey('accounts.User', related_name="addresses", on_delete=models.CASCADE)
+    street          = models.CharField(max_length=255)
+    city            = models.CharField(max_length=255)
+    phone           = models.CharField(max_length=255, blank=True, null=True)

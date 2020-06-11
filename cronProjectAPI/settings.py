@@ -31,6 +31,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'ps7(e&!!l(kbsmr$76qia@(zi%p=^w
 DEBUG = bool( os.environ.get('DJANGO_DEBUG', True) )
 
 ALLOWED_HOSTS = [
+    'mein-r1an-frau.herokuapp.com',
     'delivery-api-cron.herokuapp.com',
     '127.0.0.1'
 ]
@@ -178,10 +179,8 @@ from datetime import timedelta
 
 REST_KNOX = {
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
-    'TOKEN_TTL': timedelta(hours= 24*7),
+    'TOKEN_TTL': timedelta(hours= 24*60),
 }
 
 
 ADMIN_PASSWORD = 'sha1$4e987$afbcf42e21bd417fb71db8c66b321e9fc33051de'
-
-
