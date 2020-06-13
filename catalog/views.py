@@ -257,6 +257,13 @@ class CartItemAddView(APIView):
 
 
     def get(self, request):
+
+        try:
+            cart = Cart.objects.get(user=self.request.user)
+        except:
+            cart = Cart.objects.create(user=self.request.user)
+            cart.save()
+
         cart = Cart.objects.filter(user=self.request.user)
         serializer = CartSerializer(cart, many=True)
         return Response({"cart": serializer.data})
@@ -296,13 +303,50 @@ class CartItemAddView(APIView):
             existing_cart_item = CartItem.objects.get(cart=cart.id, title=dish.title)
         except:
             existing_cart_item = None
+
         # print(existing_cart_item)
 
         if existing_cart_item is not None:
-            existing_cart_item.quantity = quantity
-            existing_cart_item.save()
-            # existing_cart_item.delete()
-            # print(existing_cart_item.cart)
+            # checking if existing cart has additives and extras in given request
+            add = existing_cart_item.additives.filter(name=additives)
+            if add: 
+                for ext in extra_list:
+                    flag = False
+                    extra = existing_cart_item.extra.filter(id=ext)
+                    if extra:
+                        flag = True
+                    else:
+                        break      
+                if flag:
+                    existing_cart_item.quantity=quantity
+                    existing_cart_item.save()
+                    print(True)
+
+                else:
+                    new_cart_item = CartItem.objects.create( 
+                        cart=cart,
+                        title=dish.title,
+                        price=dish.price,
+                        image=dish.image,
+                        description=dish.description,
+                        portionWeight=dish.portionWeight,
+                        quantity = quantity
+                    )
+
+                    new_cart_item.save()
+                    # new_cart_item.dish.additives.filter(pk=request.data['additives_id'])
+                    category = dish.category
+                    for cat in category.values():
+                        obj = Category.objects.get(name=cat["name"])
+                        new_cart_item.category.add(obj)
+
+                    new_cart_item.additives.add(additives)
+
+                    for extra in extra_list:
+                        obj = DishExtra.objects.get(pk=extra)
+                        new_cart_item.extra.add(obj)
+
+        
         else:
             new_cart_item = CartItem.objects.create( 
                 cart=cart,
