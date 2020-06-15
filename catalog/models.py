@@ -4,6 +4,8 @@ import os
 from django.db import models
 from django.conf import settings
 
+from django.utils import timezone
+
 from accounts.models import User
 
 
@@ -121,13 +123,15 @@ class Cart(models.Model):
         on_delete=models.CASCADE,
         default=None
         )
-    # dish = models.ForeignKey(Dish, on_delete=models.CASCADE, blank=True, null=True)
-    # additives = models.ManyToManyField(DishAdditive)#, on_delete=models.CASCADE, blank=True, null=True)
-    # extra = models.ManyToManyField(DishExtra)
-    # quantity = models.PositiveIntegerField(default=1)
+    # created_at = models.DateTimeField(editable=False)
+    # updated_at = models.DateTimeField()
     
-    def __unicode__(self):
-        return '%s: %s' %(self.dish.title, self.quantity)
+    # def save(self, *args, **kwargs):
+    #     ''' On save, update timestamps '''
+    #     if not self.id:
+    #         self.created_at = timezone.now()
+    #     self.updated_at = timezone.now()
+    #     return super(Cart, self).save(*args, **kwargs)
 
 
 class CartItem(models.Model):
@@ -136,22 +140,52 @@ class CartItem(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='items'
+        related_name="items"
     )
 
-    title           = models.CharField(("Навзание блюда"),max_length = 200, help_text='Назовите блюдо')
-    price           = models.IntegerField(("Цена блюда"),help_text = 'Укажите цену')
-    image           = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = '002.jpg')
-    description     = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
-    portionWeight   = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
-    category        = models.ManyToManyField(Category,
-                             help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS')
+    title           = models.CharField(("Навзание блюда"),max_length = 200)
+    price           = models.IntegerField(("Цена блюда"))
+    image           = models.ImageField(("Картинка блюда"))
+    description     = models.CharField(("Описание блюда"),max_length = 200)
+    portionWeight   = models.IntegerField(("Масса порции"))
+    category        = models.ManyToManyField(Category)
+
     additives       = models.ManyToManyField(DishAdditive)
     extra           = models.ManyToManyField(DishExtra)
+
+    quantity = models.PositiveIntegerField(default=1)
+
+
+    def __unicode__(self):
+        return '%s: %s' %(self.dish.title, self.quantity)
  
-    quantity        = models.PositiveIntegerField(default=1)
-    
-    
+
+# class CartItemQuantity(models.Model):
+
+
+
+# class CartItem(models.Model):
+#     cart = models.ForeignKey(
+#         Cart,
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True,
+#         related_name='items'
+#     )
+#     dishDetail = models.ForeignKey(
+#         CartDish,
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True
+#         )
+#     quantity = models.ForeignKey(
+#         CartItemQuantity,
+#         on_delete=models.CASCADE,
+#         null=True,
+#         blank=True
+#     )
+
+
 class Address(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     user            = models.ForeignKey('accounts.User', related_name="addresses", on_delete=models.CASCADE)

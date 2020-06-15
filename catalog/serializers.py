@@ -1,6 +1,8 @@
 # from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.fields import CurrentUserDefault
 from accounts.models import User
+
 
 from .models import *
 
@@ -11,10 +13,6 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User 
         fields = '__all__'
     
-    # def restore_object(self, attrs, instance=None):
-    #     user = super(AcoountSerializer, self).restore_object(attrs, instance)
-    #     return user 
-
 
 class DishSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -76,24 +74,17 @@ class DishDetailSerializer(serializers.ModelSerializer):
         fields =  ('id', 'title', 'image', 'price',  'portionWeight','description', 'category', 'additives', 'extra')
 
 
-class CartItemSerializer(serializers.ModelSerializer):
+class CartDishSerializer(serializers.ModelSerializer):
 
-    # dish = DishDetailSerializer(read_only=True)
     image = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
     category    = CategoriesSerializer(many=True, read_only=True)
     additives   = DishAdditivesSerializer(many=True,read_only=True)
     extra       = DishExtrasSerializer(many=True,read_only=True)
-
-
-    # def to_internal_value(self, data):
-    #     cart_data = data['cart']
-    #     return super().to_internal_value(cart_data)
-
+    
     class Meta:
         model = CartItem
         fields = (
             'id', 
-            'cart',
             'title', 
             'price',
             'image', 
@@ -102,15 +93,75 @@ class CartItemSerializer(serializers.ModelSerializer):
             'category',
             'additives', 
             'extra', 
+        )
+
+
+        def to_internal_value(self, data):
+            validated = {
+            "dishDetail":{
+                "id": data.get("id"),
+                "title": data.get("title"),
+                "price": data.get("price"),
+                "image": data.get("image"),
+                "description": data.get("description"),
+                "portionWeight": data.get("portionWeight"),
+                "category": data.get("category"),
+                "addtitives": data.get("additives"),
+                "extra": data.get("extra")
+            },
+            "quantity": data.get("quantity")
+        }
+            return validated
+
+
+class CartDishQuantity(serializers.ModelSerializer):
+
+    class Meta:
+        model = CartItem
+        fields = ('id', 'quantity')
+
+    
+
+class CartItemSerializer(serializers.ModelSerializer):
+    
+    # dishDetail = CartDishSerializer(read_only=True)
+    dishDetail = serializers.SerializerMethodField('get_dish_details')
+    
+
+    class Meta:
+        model = CartItem
+        fields = (
+            'dishDetail', 
             'quantity'
         )
 
-    def create(self, validated_data):
-        pass
+
+    def get_dish_details(self, obj):
+        
+        cartitem = CartItem.objects.filter(cart=obj.cart)
+ 
+        return CartDishSerializer(cartitem, many=True).data
+
+    '''def to_representation(self, instance):
+        return {
+            'dishDetail': {
+                'id': instance.id,
+                'title': instance.title,
+                'price': instance.price,
+                'image': instance.image.url,
+                'description': instance.description,
+                'portionWeight': instance.portionWeight,
+                'category': instance.category,
+                'additives': instance.additives,
+                'extra': instance.extra
+            },
+            'quantity': instance.quantity
+        }'''
+    
 
 
 class CartSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(many=True, read_only=True)
+    items = CartItemSerializer(many=True,read_only=True)
 
     class Meta:
         model = Cart
@@ -158,3 +209,4 @@ class DishDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = DishDetails
         fields = ('dish', 'image_url')  '''
+

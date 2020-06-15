@@ -26,26 +26,6 @@ class DishDetailView(RetrieveAPIView):
     serializer_class = DishDetailSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    # def get(self, request, *args, **kwargs):
-    #     # get objects
-    #     dish = Dish.objects.all()
-    #     additives = DishAdditive.objects.all()
-
-    #     context = {
-    #             "request": request,
-    #     }
-
-    #     # get data from serializers
-    #     dishes_ser = DishDetailSerializer(dish, many=True, context=context)
-    #     additives_ser = DishAdditivesSerializer(additives, many=True, context=context)
-
-    #     # customize the response data
-    #     response = dishes_ser.data + additives_ser.data
-
-    #     # return custom representation of data
-    #     return Response(response)
-
-
 class DynamicSearchFilter(filters.SearchFilter):
     def get_search_fields(self, view, request):
         return request.GET.getlist('search_fields', [])
@@ -84,15 +64,6 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
 
     def get(self, request,*args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-
-# class CategoryFilter(rest_filters.FilterSet):
-#     dishes = CharFilter(field_name='category__dishes__title', lookup_expr='icontains')
-
-#     class Meta:
-#         model = Category
-#         fields = ['category__dishes__title', 'name']
-
 
 
 class CategoryItemsSearchView(ListAPIView):
@@ -263,7 +234,7 @@ class CartItemAddView(APIView):
         except:
             cart = Cart.objects.create(user=self.request.user)
             cart.save()
-
+        
         cart = Cart.objects.filter(user=self.request.user)
         serializer = CartSerializer(cart, many=True)
         return Response({"cart": serializer.data})
@@ -274,7 +245,7 @@ class CartItemAddView(APIView):
         try:
             cart = Cart.objects.get(user=self.request.user)
         except:
-            cart = Cart.objects.create(user=self.request.user)
+            cart = Cart.objects.create(id=self.request.user.id,user=self.request.user)
             cart.save()
 
         try:
@@ -370,9 +341,9 @@ class CartItemAddView(APIView):
             for extra in extra_list:
                 obj = DishExtra.objects.get(pk=extra)
                 new_cart_item.extra.add(obj)
-                
+               
         user_cart = Cart.objects.filter(user=self.request.user)
-        
+
         serializer = CartSerializer(user_cart, many=True)
         return Response({
             "cart": serializer.data
@@ -413,9 +384,7 @@ class CartItemEditView(APIView):
         user_cart = Cart.objects.filter(user=self.request.user)
 
         serializer = CartSerializer(user_cart, many=True)
-        return Response({
-            "cart": serializer.data
-        })
+        return Response({"cart" : serializer.data })
 
 
 class CartItemDeleteView(APIView):
