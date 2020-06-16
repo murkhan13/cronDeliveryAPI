@@ -46,7 +46,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta: 
         model = User 
-        fields = '__all__'
+        fields = (
+            'id', 
+            'phone', 
+            'name'
+        )
 
 
 class DishListSerializer(serializers.ModelSerializer):
@@ -96,32 +100,6 @@ class CartDishSerializer(serializers.ModelSerializer):
         )
 
 
-        def to_internal_value(self, data):
-            validated = {
-            "dishDetail":{
-                "id": data.get("id"),
-                "title": data.get("title"),
-                "price": data.get("price"),
-                "image": data.get("image"),
-                "description": data.get("description"),
-                "portionWeight": data.get("portionWeight"),
-                "category": data.get("category"),
-                "addtitives": data.get("additives"),
-                "extra": data.get("extra")
-            },
-            "quantity": data.get("quantity")
-        }
-            return validated
-
-
-class CartDishQuantity(serializers.ModelSerializer):
-
-    class Meta:
-        model = CartItem
-        fields = ('id', 'quantity')
-
-    
-
 class CartItemSerializer(serializers.ModelSerializer):
     
     # dishDetail = CartDishSerializer(read_only=True)
@@ -138,7 +116,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     def get_dish_details(self, obj):
         
-        cartitem = CartItem.objects.filter(cart=obj.cart)
+        cartitem = CartItem.objects.filter(cart=obj.cart, title=obj.title)
  
         return CartDishSerializer(cartitem, many=True).data
 
@@ -201,12 +179,4 @@ class RestaurantSerializer(serializers.ModelSerializer):
         fields = ( 'title', 'workTime', 'minOrder', 'freeOrder', 'address', 'delivery', 'logo', 'info')
     
 
-'''
-class DishDetailSerializer(serializers.ModelSerializer):
-    
-    image_url = serializers.URLField(source='get_absolute_image_url', read_only=True)
-
-    class Meta:
-        model = DishDetails
-        fields = ('dish', 'image_url')  '''
 

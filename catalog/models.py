@@ -125,7 +125,7 @@ class Cart(models.Model):
         )
     # created_at = models.DateTimeField(editable=False)
     # updated_at = models.DateTimeField()
-    
+        
     # def save(self, *args, **kwargs):
     #     ''' On save, update timestamps '''
     #     if not self.id:
@@ -142,7 +142,6 @@ class CartItem(models.Model):
         blank=True,
         related_name="items"
     )
-
     title           = models.CharField(("Навзание блюда"),max_length = 200)
     price           = models.IntegerField(("Цена блюда"))
     image           = models.ImageField(("Картинка блюда"))
@@ -159,32 +158,6 @@ class CartItem(models.Model):
     def __unicode__(self):
         return '%s: %s' %(self.dish.title, self.quantity)
  
-
-# class CartItemQuantity(models.Model):
-
-
-
-# class CartItem(models.Model):
-#     cart = models.ForeignKey(
-#         Cart,
-#         on_delete=models.CASCADE,
-#         null=True,
-#         blank=True,
-#         related_name='items'
-#     )
-#     dishDetail = models.ForeignKey(
-#         CartDish,
-#         on_delete=models.CASCADE,
-#         null=True,
-#         blank=True
-#         )
-#     quantity = models.ForeignKey(
-#         CartItemQuantity,
-#         on_delete=models.CASCADE,
-#         null=True,
-#         blank=True
-#     )
-
 
 class Address(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)

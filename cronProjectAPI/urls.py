@@ -27,5 +27,6 @@ urlpatterns = [
     #For logins
     re_path(r'^api/v1/', include('accounts.urls')),
     path('api/v1/auth/', include('rest_framework.urls')),
+    path('api/v1/', include('orders.urls'))
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root= settings.MEDIA_ROOT)

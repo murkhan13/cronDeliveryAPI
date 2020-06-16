@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_filters',
     'accounts',
     'knox',
+    'orders'
 ]
 
 REST_FRAMEWORK = {

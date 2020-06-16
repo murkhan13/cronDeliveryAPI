@@ -1,6 +1,9 @@
+
 from django.contrib import admin
 from django.urls import path
 from .views import *
+
+
 urlpatterns = [
     path('categories/', CategoryListView.as_view()),
     path('dishes/<int:pk>', DishDetailView.as_view()),
