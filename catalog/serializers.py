@@ -116,7 +116,8 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     def get_dish_details(self, obj):
         
-        cartitem = CartItem.objects.filter(cart=obj.cart, title=obj.title)
+        cartitem = CartItem.objects.filter(id=obj.id)
+        
  
         return CartDishSerializer(cartitem, many=True).data
 
