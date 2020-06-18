@@ -24,7 +24,7 @@ class CartItemToOrderSerializer(serializers.ModelSerializer):
 class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Address
+        model = Order
         fields = (
             'id',
             "street", 
@@ -60,13 +60,20 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'id', 
-            'user', 
+            'user',
             'address',
             'phone',
             'deliverTo',
-            'total', 
             'created_at', 
             'order_items'
+            'street', 
+            'building',
+            'porch',
+            'floor',
+            'apartment',
+            'comment',
+            'date_created',
+            'total' 
         )
     
     def create(self, validated_data):
@@ -75,7 +82,3 @@ class OrderSerializer(serializers.ModelSerializer):
 
         order = Order.objects.create(**validated_data)
         return order
-
-
-
-

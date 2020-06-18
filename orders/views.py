@@ -37,7 +37,6 @@ class OrderView(APIView):
 
     def post(self, request, pk=None):
 
-
         try: 
             purchaser_id = self.request.user.id
             purchaser = User.objects.get(id=purchaser_id)
@@ -46,23 +45,55 @@ class OrderView(APIView):
             raise serializers.ValidationError(
                 'Пользователь не найден'
         )   
-            
+        
+        try: 
+            street = request.data['street']
+            building = request.data['building']
+        except:
+            return Response({
+                "status": False
+            })
 
-        print(cart.items.all())
+        if 'deliveryTo' in request.data:
+            deliverTo = request.data['deliverTo']
+        else: 
+            deliveryTo = "Как можно быстрее"
+        if 'porch' in request.data:
+            porch = request.data['porch']
+        else:
+            porch = None
+        if 'floor' in request.data:
+            floor = request.data['floor']
+        else:
+            floor = None 
+        if 'apartment' in request.data:
+            apartment = request.data['apartment']
+        else: 
+            apartment = None
+        if 'comment' in request.data:
+            comment = request.data['comment']
+        else:
+            comment = None
         
         # cartitems = CartItem.objects.all()
 
-        # serializer = CartItemToOrderSerializer(cartitems, many=True)
-        # return Response(serializer.data)
+        # serializer = CartserializerItemToOrderSerializer(cartitems, many=True)
+        # return Response(.data)
 
-        
+        # address = Address.objects.get(id=request.data['address_id'])
 
-        
-        # total_aggregated_dict = cart.items.aggregate(total=Sum(F('quantity')*F('price'),output_field=FloatField()))
-
-        # order_total = round(total_aggregated_dict['total'], 2)
-        # order = serializer.save(user=purchaser, total=order_total)
-        order = Order(user=purchaser, phone=request.data['phone'], total=request.data['total'])
+        order = Order(
+            user=purchaser, 
+            phone=request.data['phone'], 
+            total=request.data['total'],
+            deliverTo=deliverTo,
+            street=street,
+            building=building,
+            porch=porch,
+            floor=floor,
+            apartment=apartment,
+            comment=comment
+            )
 
         order.save()
 
@@ -75,15 +106,86 @@ class OrderView(APIView):
         
         cart.items.clear()
 
-        Address.objects.create(
-            user=self.request.user, 
-            order=order, 
-            street=request.data['street'], 
-            building=request.data['building']
-        )
-
         user_order = Order.objects.filter(id=order.id)
 
         serializer = OrderSerializer(user_order, many=True)
 
         return Response({"order":serializer.data})
+
+
+class AddressView(APIView):
+
+    serializer_class = AddressSerializer
+    qyeryset = Order.objects.all()
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk=None):
+
+        try:
+
+            user_addresses = Order.objects.filter(user=self.request.user)
+
+            serializer = AddressSerializer(user_addresses, many=True)
+            return Response(serializer.data)
+        except:
+            return Response({
+                "status": True
+            })
+
+    def post(self, request, pk=None):
+
+        try: 
+            street = request.data['street']
+            building = request.data['building']
+        except:
+            return Response({
+                "status": False
+            })
+        if 'porch' in request.data:
+            porch = request.data['porch']
+        else:
+            porch = None
+        if 'floor' in request.data:
+            floor = request.data['floor']
+        else:
+            floor = None 
+        if 'apartment' in request.data:
+            apartment = request.data['apartment']
+        else: 
+            apartment = None
+        if 'comment' in request.data:
+            comment = request.data['comment']
+        else:
+            comment = None
+
+        try:
+            new_address = Address.objects.create(
+                user=self.request.user,
+                street=street,
+                building=building,
+                porch=porch,
+                floor=floor,
+                apartment=apartment,
+                comment=comment
+            )
+            return Response({
+                "status": True
+            })
+        except:
+            return Response({
+                "status": False
+            })
+
+
+'''Address.objects.create(
+            user=self.request.user, 
+            order=order, 
+            street=request.data['street'], 
+            building=request.data['building']
+)'''
+
+'''total_aggregated_dict = cart.items.aggregate(total=Sum(F('quantity')*F('price'),output_field=FloatField()))
+
+        order_total = round(total_aggregated_dict['total'], 2)
+        order = serializer.save(user=purchaser, total=order_total)'''

@@ -257,15 +257,18 @@ class CartItemAddView(APIView):
             additives = DishAdditive.objects.get(
                 id=request.data['additives_id']
             )
-            extra_list = request.POST.getlist('extra_id')
+            
             quantity = int(request.data.get('quantity'))   
             
         except Exception as e:
-            print(e)
             return Response({
                 'status': False,
                 'detail': "Ошибка при добавлении в корзину"
             })
+        try: 
+            extra_list = request.POST.getlist('extra_id')
+        except:
+            extra_list = None
         
         # extra_list = [int(s) for s in extra_id.split(',')]
 
@@ -282,17 +285,20 @@ class CartItemAddView(APIView):
             # checking if existing cart has additives and extras in given request
             add = existing_cart_item.additives.filter(name=additives)
             if add: 
-                for ext in extra_list:
-                    flag = False
-                    extra = existing_cart_item.extra.filter(id=ext)
-                    if extra:
-                        flag = True
-                    else:
-                        break      
+                if extra_list is not None:
+                    for ext in extra_list:
+                        flag = False
+                        extra = existing_cart_item.extra.filter(id=ext)
+                        if extra:
+                            flag = True
+                        else:
+                            break      
                 if flag:
-                    existing_cart_item.quantity=quantity
+                    existing_cart_item.quantity += quantity
                     existing_cart_item.save()
-                    print(True)
+                    return Response({
+                        "status":True
+                    })
                 else:
                     try:
                         new_cart_item = CartItem.objects.create( 
@@ -346,10 +352,10 @@ class CartItemAddView(APIView):
                     new_cart_item.category.add(obj)
 
                 new_cart_item.additives.add(additives)
-
-                for extra in extra_list:
-                    obj = DishExtra.objects.get(pk=extra)
-                    new_cart_item.extra.add(obj)
+                if extra_list is not None:
+                    for extra in extra_list:
+                        obj = DishExtra.objects.get(pk=extra)
+                        new_cart_item.extra.add(obj)
 
                 return Response({
                     "status": True
@@ -431,9 +437,11 @@ class CartItemDeleteView(APIView):
             return Response({
                 "status": True
             })
-        except:
+        except Exception as e:
+            
             return Response({
-                "status": False
+                "status": False,
+                "error": e
             })
 
 
