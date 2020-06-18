@@ -11,7 +11,7 @@ class CartItemToOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ('dishDetail')
+        fields = ('dishDetail',)
     
     
     def get_dish_details(self, obj):
@@ -21,16 +21,49 @@ class CartItemToOrderSerializer(serializers.ModelSerializer):
         return CartDishSerializer(cartitem, many=True).data
 
 
+class AddressSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Address
+        fields = (
+            'id',
+            "street", 
+            "building",
+            "porch",
+            "floor",
+            "apartment",
+            "comment",
+            "date_created"
+        )
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    
+    order_dish = CartItemToOrderSerializer(many=True,read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = (
+            'id',
+            'order_dish',
+            'quantity',
+        )
+
+
 class OrderSerializer(serializers.ModelSerializer):
 
     user = UserSerializer(read_only=True)
-    order_items = serializers.StringRelatedField(many=True, required=False)
+    # address = AddressSerializer(many=True,read_only=True)
+    order_items = OrderItemSerializer(many=True, required=False)
 
     class Meta:
         model = Order
         fields = (
             'id', 
             'user', 
+            'address',
+            'phone',
+            'deliverTo',
             'total', 
             'created_at', 
             'order_items'
@@ -44,14 +77,5 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
 
 
-class OrderItemSerializer(serializers.ModelSerializer):
 
-    order_dish = CartItemToOrderSerializer(read_only=True)
 
-    class Meta:
-        model = OrderItem
-        fields = (
-            'id',
-            'order_dish',
-            'quantity'
-        )

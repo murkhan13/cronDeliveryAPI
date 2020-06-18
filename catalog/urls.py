@@ -13,5 +13,6 @@ urlpatterns = [
     path('restaurant/', RestaurantView.as_view()),
     path('cart/add/', CartItemAddView.as_view()),
     path('cart/edit/', CartItemEditView.as_view()),
-    path('cart/delete/', CartItemDeleteView.as_view())
+    path('cart/delete/', CartItemDeleteView.as_view()),
+    path('cart/deleteall/', CartDeleteView.as_view())
 ]

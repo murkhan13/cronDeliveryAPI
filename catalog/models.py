@@ -158,10 +158,3 @@ class CartItem(models.Model):
     def __unicode__(self):
         return '%s: %s' %(self.dish.title, self.quantity)
  
-
-class Address(models.Model):
-    date_created    = models.DateTimeField(auto_now_add=True)
-    user            = models.ForeignKey('accounts.User', related_name="addresses", on_delete=models.CASCADE)
-    street          = models.CharField(max_length=255)
-    city            = models.CharField(max_length=255)
-    phone           = models.CharField(max_length=255, blank=True, null=True)
