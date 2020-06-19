@@ -235,6 +235,8 @@ class CartItemAddView(APIView):
             cart = Cart.objects.create(user=self.request.user)
             cart.save()
         
+        
+        
         user_cart = Cart.objects.get(user=self.request.user)
         cartitems = CartItem.objects.filter(cart=user_cart)
         serializer = CartItemSerializer(cartitems, many=True)
@@ -254,10 +256,6 @@ class CartItemAddView(APIView):
                 pk=request.data['dish_id']
             )
             dish_id = int(request.data.get('dish_id'))
-            additives = DishAdditive.objects.get(
-                id=request.data['additives_id']
-            )
-            
             quantity = int(request.data.get('quantity'))   
             
         except Exception as e:
@@ -266,6 +264,12 @@ class CartItemAddView(APIView):
                 'detail': "Ошибка при добавлении в корзину"
             })
         try: 
+            additives = DishAdditive.objects.get(
+                id=request.data['additives_id']
+            )
+        except:
+            additives = None
+        try: 
             extra_list = request.POST.getlist('extra_id')
         except:
             extra_list = None
@@ -273,35 +277,112 @@ class CartItemAddView(APIView):
         # extra_list = [int(s) for s in extra_id.split(',')]
 
         # print('https://mein-r1an-frau.herokuapp.com' + dish.image.url, category.values(), additives)
-        
-        try:
-            existing_cart_item = CartItem.objects.get(cart=cart.id, title=dish.title)
-        except:
-            existing_cart_item = None
 
-        # print(existing_cart_item)
+        existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
 
-        if existing_cart_item is not None:
-            # checking if existing cart has additives and extras in given request
-            add = existing_cart_item.additives.filter(name=additives)
-            if add: 
-                if extra_list is not None:
-                    for ext in extra_list:
-                        flag = False
-                        extra = existing_cart_item.extra.filter(id=ext)
-                        if extra:
-                            flag = True
+        if additives is not None and extra_list is not None:
+            flag = False
+            for existing_cart_item in existing_cart_items:
+                flag = False 
+                if len(existing_cart_item.additives.all()) == 0:
+                    flag = False
+                elif len(existing_cart_item.additives.all()) > 0:
+                    addtv = existing_cart_item.additives.filter(name=additives)
+                    if len(addtv) > 0:
+                        flag = True
+                    if flag:
+                        if len(extra_list) != len(existing_cart_item.extra.all()):
+                            flag = False
+                            continue
                         else:
-                            break      
-                if flag:
+                            check = 0
+                            for extr in extra_list:
+                                flag = False
+                                extra = existing_cart_item.extra.filter(id=extr)
+                                if extra:
+                                    check += 1
+                            if check == len(existing_cart_item.extra.all()):
+                                flag=True
+                if flag == True: 
                     existing_cart_item.quantity += quantity
                     existing_cart_item.save()
                     return Response({
-                        "status":True
+                        "status": True
                     })
-                else:
-                    try:
-                        new_cart_item = CartItem.objects.create( 
+                    break
+                            
+        
+        if additives is None and extra_list is not None:
+            flag = False
+            for existing_cart_item in existing_cart_items:
+                flag = False
+                if len(existing_cart_item.additives.all()) > 0:
+                    flag = False
+                elif len(existing_cart_item.additives.all()) == 0:
+                    if len(extra_list) != len(existing_cart_item.extra.all()):
+                            flag = False
+                    else:
+                        check = 0
+                        for extr in extra_list:
+                            flag = False
+                            extra = existing_cart_item.extra.filter(id=extr)
+                            if extra:
+                                check += 1
+                        if check == len(existing_cart_item.extra.all()):
+                            flag=True
+                if flag == True: 
+                    existing_cart_item.quantity += quantity
+                    existing_cart_item.save()
+                    return Response({
+                        "status": True
+                    })
+                    break
+        
+        if additives is not None and extra_list is None:
+            flag = False
+            for existing_cart_item in existing_cart_items: 
+                if len(existing_cart_item.additives.all()) == 0:
+                    flag = False
+                elif len(existing_cart_item.additives.all()) > 0:
+                    addtv = existing_cart_item.additives.filter(name=additives)
+                    if len(addtv) > 0:
+                        flag = True
+                    if flag:
+                        if len(extra_list) != len(existing_cart_item.extra.all()):
+                            flag = False
+                            continue
+                        if len(existing_cart_item.extra.all()) == 0:
+                            flag = True
+                if flag == True: 
+                    existing_cart_item.quantity += quantity
+                    existing_cart_item.save()
+                    return Response({
+                        "status": True
+                    })
+                    break            
+        
+        if additives is None and extra_list is None:
+            flag = False
+            for existing_cart_item in existing_cart_items:
+                if len(existing_cart_item.additives.all()) > 0:
+                    flag = False
+                elif len(existing_cart_item.additives.all()) == 0:
+                    if len(existing_cart_item.extra.all()) > 0:
+                        flag = False
+                    elif len(existing_cart_item.extra.all()) == 0:
+                        flag = True
+                
+                if flag == True: 
+                    existing_cart_item.quantity += quantity
+                    existing_cart_item.save()
+                    return Response({
+                        "status": True
+                    })
+                    break
+
+        if flag == False:
+            try: 
+                new_cart_item = CartItem.objects.create( 
                         cart=cart,
                         title=dish.title,
                         price=dish.price,
@@ -309,68 +390,27 @@ class CartItemAddView(APIView):
                         description=dish.description,
                         portionWeight=dish.portionWeight,
                         quantity = quantity
-                        )
-
-                        new_cart_item.save()
-                        # new_cart_item.dish.additives.filter(pk=request.data['additives_id'])
-                        category = dish.category
-                        for cat in category.values():
-                            obj = Category.objects.get(name=cat["name"])
-                            new_cart_item.category.add(obj)
-
-                        new_cart_item.additives.add(additives)
-
-                        for extra in extra_list:
-                            obj = DishExtra.objects.get(pk=extra)
-                            new_cart_item.extra.add(obj)
-                        return Response({
-                            "status": True
-                        })
-                    except:
-                        return Response({
-                            "status": False
-                        })
-
-        
-        else:
-            try:
-                new_cart_item = CartItem.objects.create( 
-                    cart=cart,
-                    title=dish.title,
-                    price=dish.price,
-                    image=dish.image,
-                    description=dish.description,
-                    portionWeight=dish.portionWeight,
-                    quantity = quantity
                 )
-
                 new_cart_item.save()
-                # new_cart_item.dish.additives.filter(pk=request.data['additives_id'])
                 category = dish.category
                 for cat in category.values():
                     obj = Category.objects.get(name=cat["name"])
                     new_cart_item.category.add(obj)
 
-                new_cart_item.additives.add(additives)
+                if additives is not None:
+                    new_cart_item.additives.add(additives)
+            
                 if extra_list is not None:
                     for extra in extra_list:
                         obj = DishExtra.objects.get(pk=extra)
                         new_cart_item.extra.add(obj)
-
                 return Response({
-                    "status": True
+                        "status": True
                 })
             except:
                 return Response({
                     "status": False
-                })
-        '''user_cart = Cart.objects.filter(user=self.request.user)
-
-        serializer = CartSerializer(user_cart, many=True)
-        return Response({
-            "cart": serializer.data
-        })'''
-        
+                }) 
              
 class CartItemEditView(APIView):
 

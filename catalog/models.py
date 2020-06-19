@@ -132,6 +132,8 @@ class Cart(models.Model):
     #         self.created_at = timezone.now()
     #     self.updated_at = timezone.now()
     #     return super(Cart, self).save(*args, **kwargs)
+    class Meta: 
+        verbose_name_plural = "Корзина"
 
 
 class CartItem(models.Model):

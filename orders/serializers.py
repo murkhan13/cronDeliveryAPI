@@ -1,5 +1,6 @@
 from catalog.serializers import UserSerializer, CartDishSerializer
 from catalog.models import CartItem
+from catalog.serializers import CategoriesSerializer, DishAdditivesSerializer, DishExtrasSerializer
 
 from orders.models import *
 from rest_framework import serializers
@@ -7,24 +8,37 @@ from rest_framework import serializers
 
 class CartItemToOrderSerializer(serializers.ModelSerializer):
 
-    dishDetail = serializers.SerializerMethodField('get_dish_details')
+    category = CategoriesSerializer(many=True, read_only=True)
+    additives = DishAdditivesSerializer(many=True, read_only=True)
+    extra = DishExtrasSerializer(many=True, read_only=True)
 
     class Meta:
         model = CartItem
-        fields = ('dishDetail',)
-    
-    
-    def get_dish_details(self, obj):
+        fields = (
+            'id', 
+            'title', 
+            'price',
+            'image', 
+            'description',
+            'portionWeight',
+            'category',
+            'additives', 
+            'extra'
+        )
         
-        cartitem = CartItem.objects.filter(cart=obj.cart)
+    
+    
+    # def get_dish_details(self, obj):
+        
+    #     cartitem = CartItem.objects.filter(cart=obj.cart)
  
-        return CartDishSerializer(cartitem, many=True).data
+    #     return CartDishSerializer(cartitem, many=True).data
 
 
 class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Order
+        model = Address
         fields = (
             'id',
             "street", 
@@ -33,18 +47,17 @@ class AddressSerializer(serializers.ModelSerializer):
             "floor",
             "apartment",
             "comment",
-            "date_created"
+            "created_at"
         )
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
     
-    order_dish = CartItemToOrderSerializer(many=True,read_only=True)
+    order_dish = CartItemToOrderSerializer(read_only=True)
 
     class Meta:
         model = OrderItem
         fields = (
-            'id',
             'order_dish',
             'quantity',
         )
@@ -52,9 +65,9 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer(read_only=True)
+    # user = UserSerializer(read_only=True)
     # address = AddressSerializer(many=True,read_only=True)
-    order_items = OrderItemSerializer(many=True, required=False)
+    order_items = OrderItemSerializer(many=True,read_only=True)
 
     class Meta:
         model = Order
@@ -65,14 +78,9 @@ class OrderSerializer(serializers.ModelSerializer):
             'phone',
             'deliverTo',
             'created_at', 
-            'order_items'
-            'street', 
-            'building',
-            'porch',
-            'floor',
-            'apartment',
-            'comment',
-            'date_created',
+            'order_items',
+            'address',
+            'created_at',
             'total' 
         )
     

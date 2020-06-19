@@ -29,6 +29,8 @@ class OrderView(APIView):
     
     def get(self, request, pk=None):
 
+        Order.objects.all().delete()
+
         user_orders = Order.objects.filter(user=self.request.user)
 
         serializer = OrderSerializer(user_orders, many=True)
@@ -46,34 +48,6 @@ class OrderView(APIView):
                 'Пользователь не найден'
         )   
         
-        try: 
-            street = request.data['street']
-            building = request.data['building']
-        except:
-            return Response({
-                "status": False
-            })
-
-        if 'deliveryTo' in request.data:
-            deliverTo = request.data['deliverTo']
-        else: 
-            deliveryTo = "Как можно быстрее"
-        if 'porch' in request.data:
-            porch = request.data['porch']
-        else:
-            porch = None
-        if 'floor' in request.data:
-            floor = request.data['floor']
-        else:
-            floor = None 
-        if 'apartment' in request.data:
-            apartment = request.data['apartment']
-        else: 
-            apartment = None
-        if 'comment' in request.data:
-            comment = request.data['comment']
-        else:
-            comment = None
         
         # cartitems = CartItem.objects.all()
 
@@ -81,36 +55,36 @@ class OrderView(APIView):
         # return Response(.data)
 
         # address = Address.objects.get(id=request.data['address_id'])
-
+        
+        if 'deliverTo' in request.data: 
+            deliverTo = request.data['deliverTo']
+        else: 
+            deliverTo = 'Как можно быстрее'
         order = Order(
             user=purchaser, 
             phone=request.data['phone'], 
             total=request.data['total'],
             deliverTo=deliverTo,
-            street=street,
-            building=building,
-            porch=porch,
-            floor=floor,
-            apartment=apartment,
-            comment=comment
+            address = request.data['address']
             )
 
         order.save()
 
         order_items = []
 
+        
         for cart_item in cart.items.all():
             order_items.append(OrderItem(order=order, order_dish=cart_item, quantity=cart_item.quantity,))
 
         OrderItem.objects.bulk_create(order_items)
         
-        cart.items.clear()
+        # cart.items.clear()
 
         user_order = Order.objects.filter(id=order.id)
 
         serializer = OrderSerializer(user_order, many=True)
 
-        return Response({"order":serializer.data})
+        return Response(serializer.data)
 
 
 class AddressView(APIView):
@@ -124,13 +98,14 @@ class AddressView(APIView):
 
         try:
 
-            user_addresses = Order.objects.filter(user=self.request.user)
+            user_addresses = Address.objects.filter(user=self.request.user)
 
             serializer = AddressSerializer(user_addresses, many=True)
             return Response(serializer.data)
-        except:
+        except Exception as e:
+            print(e)
             return Response({
-                "status": True
+                "status": False
             })
 
     def post(self, request, pk=None):
