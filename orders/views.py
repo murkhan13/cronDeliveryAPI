@@ -29,8 +29,6 @@ class OrderView(APIView):
     
     def get(self, request, pk=None):
 
-        Order.objects.all().delete()
-
         user_orders = Order.objects.filter(user=self.request.user)
 
         serializer = OrderSerializer(user_orders, many=True)
