@@ -95,13 +95,11 @@ class AddressView(APIView):
     def get(self, request, pk=None):
 
         try:
-
             user_addresses = Address.objects.filter(user=self.request.user)
 
             serializer = AddressSerializer(user_addresses, many=True)
             return Response(serializer.data)
-        except Exception as e:
-            print(e)
+        except:
             return Response({
                 "status": False
             })

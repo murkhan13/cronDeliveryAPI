@@ -162,7 +162,7 @@ class CategoryItemsSearchView(ListAPIView):
     #     return Response(category_serializer_data) 
 
 
-class MenuPageView(RestaurantView, CategoryItemsView, ListModelMixin, GenericAPIView):
+class MenuPageView(ListModelMixin, GenericAPIView):
 
     permission_classes = (IsAuthenticatedOrReadOnly, )
     serializer_class = CategoryItemsView.serializer_class
