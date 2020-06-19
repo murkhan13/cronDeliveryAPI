@@ -7,6 +7,7 @@ from django.db.models import F
 from django.db.models import Sum
 
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
@@ -47,13 +48,6 @@ class OrderView(APIView):
         )   
         
         
-        # cartitems = CartItem.objects.all()
-
-        # serializer = CartserializerItemToOrderSerializer(cartitems, many=True)
-        # return Response(.data)
-
-        # address = Address.objects.get(id=request.data['address_id'])
-        
         if 'deliverTo' in request.data: 
             deliverTo = request.data['deliverTo']
         else: 
@@ -76,13 +70,19 @@ class OrderView(APIView):
 
         OrderItem.objects.bulk_create(order_items)
         
-        # cart.items.clear()
+        cart.items.clear()
 
         user_order = Order.objects.filter(id=order.id)
 
         serializer = OrderSerializer(user_order, many=True)
 
         return Response(serializer.data)
+
+
+class OrderSingleView(RetrieveAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class AddressView(APIView):
@@ -149,16 +149,3 @@ class AddressView(APIView):
             return Response({
                 "status": False
             })
-
-
-'''Address.objects.create(
-            user=self.request.user, 
-            order=order, 
-            street=request.data['street'], 
-            building=request.data['building']
-)'''
-
-'''total_aggregated_dict = cart.items.aggregate(total=Sum(F('quantity')*F('price'),output_field=FloatField()))
-
-        order_total = round(total_aggregated_dict['total'], 2)
-        order = serializer.save(user=purchaser, total=order_total)'''

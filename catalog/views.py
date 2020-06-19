@@ -40,16 +40,6 @@ class DishSearchView(ListModelMixin, GenericAPIView):
     def get(self, request,*args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-
-class CategoryListView(ListModelMixin, GenericAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategoriesSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-
 # class CustomSearchFilter(SearchFilter):
 #     def get_search_fields(self, view, request):
 #         if request.get_queryset.get('name','dishes__title'):
@@ -171,26 +161,6 @@ class CategoryItemsSearchView(ListAPIView):
 
     #     return Response(category_serializer_data) 
 
-        
-class RestaurantView(ListModelMixin, GenericAPIView):
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, )
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        # call the original 'list' to get the original response
-        response = super(RestaurantView, self).list(request, *args, **kwargs) 
-        
-        # customize the response data
-        response.data = {'restaurant': response.data[0:]}
-        
-
-        # return response with this custom representation
-        return  response
-
 
 class MenuPageView(RestaurantView, CategoryItemsView, ListModelMixin, GenericAPIView):
 
@@ -235,14 +205,12 @@ class CartItemAddView(APIView):
             cart = Cart.objects.create(user=self.request.user)
             cart.save()
         
-        
-        
         user_cart = Cart.objects.get(user=self.request.user)
         cartitems = CartItem.objects.filter(cart=user_cart)
         serializer = CartItemSerializer(cartitems, many=True)
         return Response(serializer.data)
     
-
+    
     def post(self, request, pk=None):
 
         try:
@@ -275,8 +243,6 @@ class CartItemAddView(APIView):
             extra_list = None
         
         # extra_list = [int(s) for s in extra_id.split(',')]
-
-        # print('https://mein-r1an-frau.herokuapp.com' + dish.image.url, category.values(), additives)
 
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
 
@@ -420,10 +386,6 @@ class CartItemEditView(APIView):
             cartitem = CartItem.objects.get(
                 pk=request.data['cartitem_id']
             )
-            additives = DishAdditive.objects.get(
-                pk = request.data['additives_id']
-            )
-            extra_list = request.POST.getlist('extra_id')
             quantity = int(request.data['quantity'])
         except Exception as e:
             print(e)
@@ -431,6 +393,17 @@ class CartItemEditView(APIView):
                 'status': False ,
                 'detail': "Ошибка запроса при изменении товаров в корзине"
             })
+
+        try: 
+            additives = DishAdditive.objects.get(
+                id=request.data['additives_id']
+            )
+        except:
+            additives = None
+        try: 
+            extra_list = request.POST.getlist('extra_id')
+        except:
+            extra_list = None
         
         try:
             cartitem.quantity = quantity
@@ -438,11 +411,13 @@ class CartItemEditView(APIView):
             cartitem.additives.clear()
             cartitem.extra.clear()
 
-            cartitem.additives.add(additives)
-
-            for extra in extra_list:
-                obj = DishExtra.objects.get(pk=extra)
-                cartitem.extra.add(obj)
+            if additives is not None:
+                cartitem.additives.add(additives)
+            
+            if extra_list is not None:
+                for extra in extra_list:
+                    obj = DishExtra.objects.get(pk=extra)
+                    cartitem.extra.add(obj)
             
             return Response({
                 "status": True
@@ -451,11 +426,6 @@ class CartItemEditView(APIView):
             return Response({
                 "status": False
             })
-
-        '''user_cart = Cart.objects.filter(user=self.request.user)
-
-        serializer = CartSerializer(user_cart, many=True)
-        return Response({"cart" : serializer.data })'''
 
 
 class CartItemDeleteView(APIView):
@@ -471,17 +441,15 @@ class CartItemDeleteView(APIView):
                 "status": False,
                 "detail": "Товар по такому id не найден"
             })
-
         try:
             cartitem.delete()
             return Response({
                 "status": True
             })
-        except Exception as e:
+        except:
             
             return Response({
-                "status": False,
-                "error": e
+                "status": False
             })
 
 
