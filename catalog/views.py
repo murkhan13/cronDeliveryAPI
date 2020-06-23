@@ -265,13 +265,10 @@ class CartItemAddView(APIView):
             )
         except:
             additives = None
-        # try: 
-        #     extra_list = request.POST.getlist('extra_id')
-        # except Exception as e:
-        #     print(e)
-        #     extra_list = None
-        extra_list = request.data.get('extra_id')
-        print(extra_list)
+        try:
+            extra_list = request.data.get('extra_id')
+        except:
+            extra_list = None
         # extra_list = [int(s) for s in extra_id.split(',')]
 
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
@@ -430,21 +427,20 @@ class CartItemEditView(APIView):
             )
         except:
             additives = None
-        try: 
-            extra_list = request.POST.getlist('extra_id')
+        try:
+            extra_list = request.data.get('extra_id')
         except:
-            extra_list = None
-        
+            extra_list = None        
         try:
             cartitem.quantity = quantity
             cartitem.save()
-            cartitem.additives.clear()
-            cartitem.extra.clear()
 
             if additives is not None:
+                cartitem.additives.clear()
                 cartitem.additives.add(additives)
             
             if extra_list is not None:
+                cartitem.extra.clear()
                 for extra in extra_list:
                     obj = DishExtra.objects.get(pk=extra)
                     cartitem.extra.add(obj)
