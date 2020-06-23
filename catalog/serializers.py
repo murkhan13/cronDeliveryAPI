@@ -172,7 +172,6 @@ class CategoryItemsSearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields =  ['id', 'name', 'dishes']
-    
 
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta: 

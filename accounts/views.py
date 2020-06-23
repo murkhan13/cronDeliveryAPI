@@ -6,6 +6,8 @@ from rest_framework import permissions, status, generics
 from .models import User, PhoneOTP
 from .serializers import CreateUserSerializer, UserSerializer, LoginSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework import status
+
 from django.contrib.auth import login
 import random
 
@@ -25,116 +27,6 @@ def send_sms(phone, key):
 
     requests.post(link)
 
-# Create your views here.
-
-class ValidatePhoneSendOTP(APIView):
-    
-    def post(self, request, *args, **kwargs):
-        phone_number = request.data.get('phone')
-
-        if phone_number:
-            phone = str(phone_number)
-            user = User.objects.filter(phone__iexact = phone)
-            if user.exists():
-                return Response({
-                    'status': False,
-                    'detail': 'phone number already exist'
-                })
-            else:
-                key = send_otp(phone)
-                if key:
-                    old = PhoneOTP.objects.filter(phone__iexact = phone)
-                    if old.exists():
-                        old = old.first()
-                        old.otp = key
-                        count = old.count
-                        old.count = count + 1
-                        old.save()
-                        # send_sms(phone, key)
-                        return Response({
-                            'status': True,
-                            'detail': 'OTP sent successfully',
-                            'key': key
-                        })
-                    else:
-                        PhoneOTP.objects.create(
-                            phone = phone,
-                            otp = key
-                        )
-                        # send_sms(phone, key)
-                        return Response({
-                            'status': True,
-                            'detail': 'OTP sent successfully',
-                            'key': key
-                        }) 
-                else:
-                    return Response({
-                        'status': False,
-                        'detail': 'Sending otp error'
-                    })
-
-        else:
-            return Response({
-                'status': False,
-                'detail': 'Phone number is not given in post request'
-            })
-
-
-class AuthValidatePhoneSendOTP(APIView):
-    
-    def post(self, request, *args, **kwargs):
-        phone_number = request.data.get('phone')
-
-        if phone_number:
-            phone = str(phone_number)
-            user = User.objects.filter(phone__iexact = phone)
-            if user.exists():
-                key = send_otp(phone)
-                print('key:', key)
-                if key:
-                    old = PhoneOTP.objects.filter(phone = phone)
-                    if old.exists():
-                        old = old.first()
-                        old.otp = key
-                        count = old.count
-                        count += 1
-                        old.save() 
-                        # send_sms(phone, key)  
-                        return Response({
-                                'status': True,
-                                'detail': 'OTP sent successfully',
-                                'key': key
-                        })    
-                         
-                    else:
-                        PhoneOTP.objects.create(
-                            phone = phone,
-                            otp = key
-                        )
-                        return Response({
-                            'status': True,
-                            'detail': 'OTP sent successfully',
-                            'key': key
-                        })
-                        # send_sms(phone, key)
-                else:
-                    return Response({
-                        'status': False,
-                        'detail': 'Sending otp error'
-                    })
-
-            else:
-                return Response({
-                    'status': False,
-                    'detail': 'Phone number is not given in post request'
-                })
-        else: 
-            return Response({
-                'status': False,
-                'detail': 'The User does not exist. Please register first'
-            })
-
-
 def send_otp(phone):
     if phone:
         key = random.randint(9999, 99999)
@@ -143,122 +35,129 @@ def send_otp(phone):
         return False
 
 
-class ValidateOTP(APIView):
-
-    # If you have received otp, post a request with phone and that ot and you will be redirected to set the password
-
+class ValidatePhoneSendOTP(APIView):
     def post(self, request, *args, **kwargs):
-        phone = request.data.get('phone', False)
-        otp_sent = request.data.get('otp', False)
+        phone_number = request.data.get('phone')
 
-        if phone and otp_sent:
-            old = PhoneOTP.objects.filter(phone__iexact = phone)
-            if old.exists():
-                old = old.first()
-                otp = old.otp
-                if str(otp_sent) == str(otp):
-                    old.validated = True
+        if phone_number:
+            phone = str(phone_number)
+            user = User.objects.filter(phone__iexact=phone)
+
+            if user.exists():
+                user_exists = True
+            else:
+                user_exists = False
+
+            key = send_otp(phone)
+            if key:
+                old = PhoneOTP.objects.filter(phone__iexact=phone)
+                if old.exists():
+                    old = old.first()
+                    old.otp = key
+                    count = old.count
+                    old.count = count + 1
                     old.save()
                     return Response({
-                        'status': True,
-                        'detail': 'OTP MATCHED. Please proceed for registration'
+                        "status": True ,
+                        "detail": "Номер телефона получен, введите код подтверждения",
+                        'key': key,
+                        'user_exists': user_exists
                     })
-                else: 
+                else:
+                    PhoneOTP.objects.create(
+                        phone = phone,
+                        otp = key
+                    )
+                        # send_sms(phone, key)
                     return Response({
-                        'status': False,
-                        'detail': 'OTP INCORRECT'
-                    })  
-            else: 
+                        'status': True,
+                        "detail": "Номер телефона получен, введите код подтверждения",
+                        'key': key,
+                        'user_exists': user_exists
+                    }) 
+            else:
                 return Response({
                     'status': False,
-                    'detail': 'First proceed via sending otp request'
+                    'detail': 'Ошибка сервера'
                 })
         else:
             return Response({
                 'status': False,
-                'detail': 'Please provide both phone and otp for validation',
+                'detail': 'Ошибка при отправке номера телефона, попробуйте ещё раз'
             })
 
 
-class Register(APIView):
+class ValidateOtpAndAuthenticate(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
 
-    def post(self, request, *args, **kwargs):
-        name = request.data.get('name', False)
+    def post(self, request, format = None):
         phone = request.data.get('phone', False)
-        
+        otp_sent = request.data.get('otp', False)
+        name = request.data.get('name', False)
 
-        if name and phone :
-            user = User.objects.filter(phone__iexact = phone)
-        
+        if phone and otp_sent:
+            user = User.objects.filter(phone__iexact=phone)
             if user.exists():
                 old = PhoneOTP.objects.filter(phone__iexact = phone)
                 if old.exists():
                     old = old.first()
-                    validated = old.validated
-                    if validated:
+                    otp = old.otp
+                    if str(otp_sent) == str(otp):
+                        old.validated = True
+                        old.save()
+                        validated = old.validated
+                        if validated:
+                            serializer = LoginSerializer(data = request.data)
+                            serializer.is_valid(raise_exception=True)
+                            user = serializer.validated_data['user']
+                            login(request,user)
+                            old.delete()
+                            print("user:",request.user)
+                            return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
+                            
+                    else: 
                         old.delete()
                         return Response({
-                        'status': True,
-                        'detail': 'Logged in.'
-                        })  
-            else :
-                old = PhoneOTP.objects.filter(phone__iexact = phone)
+                            'status': False,
+                            'detail': 'Код подтверждения неверный, повторите попытку'
+                        }) 
+                else: 
+                    return Response({
+                        'status': False,
+                        'detail': 'Ошибка запроса, сначала отправьте номер телефона'
+                    }) 
+            else:
+                old = PhoneOTP.objects.filter(phone__iexact=phone)
                 if old.exists():
                     old = old.first()
-                    validated = old.validated
-
-                    if validated:
-                        temp_data = {
+                    otp = old.otp
+                    if str(otp_sent) == str(otp):
+                        old.validated = True
+                        old.save()
+                        validated = old.validated
+                        if validated and name:
+                            temp_data = {
                             'name': name,
                             'phone': phone,
-                        }
-                        serializer = CreateUserSerializer(data=temp_data)
-                        serializer.is_valid(raise_exception=True)
-                        user = serializer.save()
+                            }
+                            serializer = CreateUserSerializer(data=temp_data)
+                            serializer.is_valid(raise_exception=True)
+                            user = serializer.save()
+                            old.delete()
+                            serializer = LoginSerializer(data = request.data)
+                            serializer.is_valid(raise_exception=True)
+                            user = serializer.validated_data['user']
+                            login(request,user)
+                            print("user:",request.user)
+                            return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
+                    else: 
                         old.delete()
-                        
                         return Response({
-                            'status': True,
-                            'detail': 'Account created'
-                        })  
-            
-        else:
-            return Response({
-                'status': False,
-                'detail': 'Both phone and name are not sent'
-            })
-
-
-class Authenticate(APIView):
-    
-    def post(self, request, *args, **kwargs):
-        phone = request.data.get('phone', False)
-        name = request.data.get('name', False)
-        if name and phone :
-            old = PhoneOTP.objects.filter(phone__iexact = phone)
-            if old.exists():
-                old = old.first()
-                validated = old.validated
-                if validated:
-                    old.delete()
+                            'status': False,
+                            'detail': 'Код подтверждения неверный, повторите попытку'
+                        })     
+                else: 
                     return Response({
-                        'status': True,
-                        'detail': 'Logged in.'
-                    })     
-        else: 
-            return Response({
-                'status': False,
-                'detail': 'Both phone and name are not sent'
-            })
-
-
-class LoginAPI(KnoxLoginView):
-    permission_classes = (permissions.AllowAny,)
-
-    def post(self, request, format = None):
-        serializer = LoginSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        login(request,user)
-        print("user:",request.user)
-        return super().post(request, format=None)
+                        'status': False,
+                        'detail': 'Ошибка запроса, сначала отправьте номер телефона'
+                    })

@@ -2,15 +2,20 @@ from django.shortcuts import render
 from django.db.models import Q , FilteredRelation
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.views import APIView
+from django.db.models import Prefetch
 from rest_framework.mixins import ListModelMixin 
 from .serializers import *
 from .models import *
 from django.shortcuts import get_object_or_404
+from itertools import chain
+
 # from rest_framework.decorators import detail_route
 # from rest_framework.decorators import list_route
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from itertools import groupby
+from operator import itemgetter
 from rest_framework.status import HTTP_200_OK
 from django.shortcuts import get_object_or_404
 
@@ -60,10 +65,13 @@ class CategoryItemsSearchView(ListAPIView):
     permission_classes = [AllowAny, ]
     queryset = Category.objects.all()
     serializer_class = CategoryItemsSearchSerializer 
-    filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
+    # filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
     # filterset_class = CategoryFilter
-    search_fields = ['name','dishes__title' ]
-
+    # search_fields = ['dishes__title']
+    # category = dish.category
+    #     for cat in category.values():
+    #         obj = Category.objects.get(name=cat["name"])
+    #         new_cart_item.category.add(obj)    
     
     # def get_queryset(self):
 
@@ -72,18 +80,38 @@ class CategoryItemsSearchView(ListAPIView):
     #     return Category.objects.filter(
     #         Q(dishes__title__icontains=search_term)
     #     )
-    
-    # def get(self, request, *args, **kwargs):
-    #     search_term = ''
-    #     if 'search' in self.request.GET:
-    #         print(self.request.GET['search'])
-    #         search_term = self.request.GET['search']
-    #     categories = Category.objects.filter(dishes__title__icontains=search_term)
-    #     serializer = CategoryItemsSearchSerializer(categories, many=True)
-    #     category_serializer_data = serializer.data
-    #     el = []
-    #     for category in category_serializer_data:
-    #         elem = category.pop('dishes', None)
+
+    def get(self, request, *args, **kwargs):
+        search_term = ''
+        if 'search' in self.request.GET:
+            search_term = self.request.GET['search']
+        
+        categories = Category.objects.filter(
+                    Q(name__icontains=search_term) |
+                    Q(dishes__title__icontains=search_term)
+                )
+        dishes = Dish.objects.values('category__name', 'id', 'title').filter(title=search_term)
+        rows = groupby(dishes, itemgetter('category__name'))
+        return Response({category_name: list(dishes) for category_name, dishes in rows})
+
+        # serializer = CategoryItemsSearchSerializer(categories, many=True)
+
+        # return Response(serializer.data)
+
+        '''categories = Category.objects.filter(dishes__title__icontains=search_term)
+        serializer = CategoryItemsSearchSerializer(categories, many=True)
+        category_serializer_data = serializer.data
+        el = []   
+        for category in category_serializer_data:
+            print(category["dishes"])
+        
+        return Response(category_serializer_data)
+        if el['title'] != search_term:
+               del el
+        for category in category_serializer_data:
+            category["dishes"] = el
+        return Response(category_serializer_data)'''
+
         
     #     for dish in range(len(elem)):
     #         if elem[dish]['title'] != search_term and elem[dish]['title'] != search_term.capitalize():
@@ -223,7 +251,7 @@ class CartItemAddView(APIView):
             dish = Dish.objects.get(
                 pk=request.data['dish_id']
             )
-            dish_id = int(request.data.get('dish_id'))
+            # dish_id = int(request.data.get('dish_id'))
             quantity = int(request.data.get('quantity'))   
             
         except Exception as e:
@@ -237,11 +265,13 @@ class CartItemAddView(APIView):
             )
         except:
             additives = None
-        try: 
-            extra_list = request.POST.getlist('extra_id')
-        except:
-            extra_list = None
-        
+        # try: 
+        #     extra_list = request.POST.getlist('extra_id')
+        # except Exception as e:
+        #     print(e)
+        #     extra_list = None
+        extra_list = request.data.get('extra_id')
+        print(extra_list)
         # extra_list = [int(s) for s in extra_id.split(',')]
 
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
@@ -352,7 +382,7 @@ class CartItemAddView(APIView):
                         cart=cart,
                         title=dish.title,
                         price=dish.price,
-                        image=dish.image,
+                        image=dish.image.url,
                         description=dish.description,
                         portionWeight=dish.portionWeight,
                         quantity = quantity
@@ -418,7 +448,6 @@ class CartItemEditView(APIView):
                 for extra in extra_list:
                     obj = DishExtra.objects.get(pk=extra)
                     cartitem.extra.add(obj)
-            
             return Response({
                 "status": True
             })

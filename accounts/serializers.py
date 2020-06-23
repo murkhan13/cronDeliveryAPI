@@ -26,21 +26,18 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     name = serializers.CharField()
-    # password = '123123'
 
     def validate(self, data):
 
         phone = data.get('phone')
         name = data.get('name')
-        # password = '123123'
        
-        if phone and name :
-            print("data:", phone, name)
+        if phone :
+            
             if User.objects.filter(phone = phone).exists():
                 user = User.objects.get(phone = phone)
                 print('details:', user.id)
                 # user = authenticate( request = self.context.get('request'), phone=phone)
-                # user = authenticate(request = self.context.get('request'), phone=phone, name=name, password=None)
                 print("user:",user)
             else:
                 msg = {
