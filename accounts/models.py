@@ -128,7 +128,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_active(self):
         return self.active
-
+    
+    class Meta:
+        verbose_name_plural = "Пользователи"
+    
 
 class PhoneOTP(models.Model):
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,14}$',

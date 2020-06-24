@@ -10,7 +10,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .forms import UserAdminChangeForm, UserAdminCreationForm
 from .models import PhoneOTP
 
-admin.site.register(PhoneOTP)
+
 
 # from .models import Profile, PhoneOTP
 

@@ -9,14 +9,14 @@ class DishExtraInline(admin.TabularInline):
     fk_name = 'dish'
     model = DishExtra
 
-# class DishInline(admin.TabularInline):
-#     model = Dish
+class DishInline(admin.TabularInline):
+    model = Dish.category.through
 
 
-# class CategoryAdmin(admin.ModelAdmin):
-#     inlines =[
-#         DishInline,
-#     ]
+class CategoryAdmin(admin.ModelAdmin):
+    inlines =[
+        DishInline,
+    ]
 
 
 class DishAdmin(admin.ModelAdmin):
@@ -24,7 +24,7 @@ class DishAdmin(admin.ModelAdmin):
 
 admin.site.register(Dish, DishAdmin)
 
-admin.site.register(Category)
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Restaurant)
 
 #admin.site.register(Dish, ) DishAdmin

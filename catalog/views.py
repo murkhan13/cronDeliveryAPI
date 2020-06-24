@@ -25,26 +25,6 @@ class DishDetailView(RetrieveAPIView):
     serializer_class = DishDetailSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-class DynamicSearchFilter(filters.SearchFilter):
-    def get_search_fields(self, view, request):
-        return request.GET.getlist('search_fields', [])
-
-
-class DishSearchView(ListModelMixin, GenericAPIView):
-    queryset =  Dish.objects.all()
-    serializer_class = DishSearchSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, )
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['title','description', 'category__name']
-    def get(self, request,*args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-# class CustomSearchFilter(SearchFilter):
-#     def get_search_fields(self, view, request):
-#         if request.get_queryset.get('name','dishes__title'):
-#             return ['name', 'dishes__title']
-#         return super(CustomSearchFilter, self).get_search_fields(view, request)
-
 
 class CategoryItemsView(ListModelMixin, GenericAPIView):
     queryset = Category.objects.all()
