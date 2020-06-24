@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.db.models import Q , FilteredRelation
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.views import APIView
 from django.db.models import Prefetch
@@ -8,22 +7,17 @@ from .serializers import *
 from .models import *
 from django.shortcuts import get_object_or_404
 from itertools import chain
+from django.db.models import Prefetch, Q, FilteredRelation
 
-# from rest_framework.decorators import detail_route
-# from rest_framework.decorators import list_route
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from itertools import groupby
-from operator import itemgetter
 from rest_framework.status import HTTP_200_OK
 from django.shortcuts import get_object_or_404
 
 import json
 from django_filters import rest_framework as rest_filters, NumberFilter, CharFilter
 from rest_framework import filters
-
-# Create your views here.
 
 
 class DishDetailView(RetrieveAPIView):
@@ -66,128 +60,24 @@ class CategoryItemsSearchView(ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryItemsSearchSerializer 
     # filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
-    # filterset_class = CategoryFilter
     # search_fields = ['dishes__title']
-    # category = dish.category
-    #     for cat in category.values():
-    #         obj = Category.objects.get(name=cat["name"])
-    #         new_cart_item.category.add(obj)    
     
-    # def get_queryset(self):
-
-    #     search_term = self.request.GET['search']
-        
-    #     return Category.objects.filter(
-    #         Q(dishes__title__icontains=search_term)
-    #     )
 
     def get(self, request, *args, **kwargs):
-        search_term = ''
         if 'search' in self.request.GET:
-            search_term = self.request.GET['search']
+            search_term = self.request.GET['search']    
         
-        categories = Category.objects.filter(
-                    Q(name__icontains=search_term) |
-                    Q(dishes__title__icontains=search_term)
-                )
-        dishes = Dish.objects.values('category__name', 'id', 'title').filter(title=search_term)
-        rows = groupby(dishes, itemgetter('category__name'))
-        return Response({category_name: list(dishes) for category_name, dishes in rows})
+        categories = Category.objects.filter(dishes__title__icontains=search_term)
 
-        # serializer = CategoryItemsSearchSerializer(categories, many=True)
+        # filtering given categories query for particular dishes
+        categories = categories.prefetch_related(
+            Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
+        )
 
-        # return Response(serializer.data)
-
-        '''categories = Category.objects.filter(dishes__title__icontains=search_term)
         serializer = CategoryItemsSearchSerializer(categories, many=True)
-        category_serializer_data = serializer.data
-        el = []   
-        for category in category_serializer_data:
-            print(category["dishes"])
-        
-        return Response(category_serializer_data)
-        if el['title'] != search_term:
-               del el
-        for category in category_serializer_data:
-            category["dishes"] = el
-        return Response(category_serializer_data)'''
 
-        
-    #     for dish in range(len(elem)):
-    #         if elem[dish]['title'] != search_term and elem[dish]['title'] != search_term.capitalize():
-    #             del elem[dish]
-    #         elif elem[dish]['title'] == search_term or elem[dish]['title'] == search_term.capitalize():
-    #             print(elem[dish])
-
-
-    #     for category in category_serializer_data:
-    #         category['dishes'] = elem
-    #     print('\n\n\n',elem)
-        
-        
-
-    #     return Response(category_serializer_data)
-         
-    # def get(self, request, *args, **kwargs):
-    #     search_term = ''
-    #     if 'search' in self.request.GET:
-    #         search_term = self.request.GET['search']
-    #     categories = Category.objects.filter(dishes__title__icontains=search_term)
-    #     # dishes = Dish.objects.filter(title__icontains=search_term)
-    #     category_serializer = CategoryItemsSerializer(categories, many=True)
-    #     # dishes_serializer = DishListSerializer(dishes, many=True)
-    #     category_serializer_data = category_serializer.data
-    #     # dishes_serializer_data = dishes_serializer.data
-
-        
-       
-
-    #     for category in category_serializer_data:
-    #         elem = category.pop('dishes', None)
-    #         for dish in range(len(elem)-1): 
-    #             if elem[dish]['title'] != search_term :
-    #                 del elem[dish]
-    #                 print(elem[dish])
-                
-    #             elif elem[dish]['title'] != search_term or elem[dish]['title'] != search_term.capitalize():
-    #                 category['dishes'] = elem[dish]
-                
-        
-    #             # for dishes in category['dishes']:
-    #             #     print(dishes)
-    #                 # for dish in range(len(dishes)):
-    #                 #     print(dish['title'])
-    #                 # while count < len(category['dishes']):
-                        
-    #                 #     print(dishes)
-    #                 #     count+=1
-    #                     # if dishes[count] != search_term and dishes[count] != search_term.capitalize():
-                            
-    #                         # if dishes['title'] != search_term and dishes['title'] != search_term:
-    #                         #     print(dishes)
-                                
-
-    #                          # print(len(category['dishes']) , "\n\n\n")
-                            
-    #                     # for dishes in category:
-    #                     #     for dish in dishes: 
-    #                     #         if dish['title'] != search_term:
-    #                     #             del dishes[dish]
-    #                     # el = category.pop('dishes', None)
-    #                     # for dish in range(len(el)-1):
-    #                     #     if el[dish]['title'] == search_term and el[dish]['title'] == search_term.capitalize():
-    #                     #         category['dishes'] = el[dish]
-    #                     #         # print(el[dish])
-    #                     #         # del el[dish]
-    #                     #     elif el[dish]['title'] != search_term and el[dish]['title'] != search_term.capitalize():
-                            
-    #                     #         del el[dish]
-    #                 # for category2 in category_serializer_data:
-    #                 #     category2['dishes'] = dishes_serializer_data
-                    
-
-
-    #     return Response(category_serializer_data) 
+        return Response(serializer.data)
+ 
 
 
 class MenuPageView(ListModelMixin, GenericAPIView):
@@ -379,7 +269,7 @@ class CartItemAddView(APIView):
                         cart=cart,
                         title=dish.title,
                         price=dish.price,
-                        image=dish.image.url,
+                        image=dish.image,
                         description=dish.description,
                         portionWeight=dish.portionWeight,
                         quantity = quantity

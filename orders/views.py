@@ -147,3 +147,21 @@ class AddressView(APIView):
             return Response({
                 "status": False
             })
+
+
+class UserProfileView(APIView):
+
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, pk=None):
+        user = self.request.user
+
+        user_queryset = User.objects.filter(pk=user.id)
+
+        serializer = UserProfileSerializer(user_queryset, many=True)
+
+        return Response(serializer.data)
+
+        

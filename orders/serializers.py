@@ -90,3 +90,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
         order = Order.objects.create(**validated_data)
         return order
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    adresses = AddressSerializer(many=True, read_only=True)
+    orders = OrderSerializer(many=True, read_only=True)
+
+    class Meta: 
+        model = User
+        fields = ('id', 'phone', 'name', 'adresses', 'orders')

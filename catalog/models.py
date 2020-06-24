@@ -38,7 +38,9 @@ class Dish(models.Model):
     description     = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
     portionWeight   = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
     category        = models.ManyToManyField(Category,
-                             help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',related_name='dishes')
+                                help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',
+                                related_name='dishes'
+                    )
     
     
     class Meta:
