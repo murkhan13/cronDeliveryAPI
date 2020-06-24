@@ -50,11 +50,11 @@ class CategoryItemsSearchView(ListAPIView):
         categories = Category.objects.filter(dishes__title__icontains=search_term)
 
         # filtering given categories query for particular dishes
-        categories = categories.prefetch_related(
+        categories1 = categories.prefetch_related(
             Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
         )
 
-        serializer = CategoryItemsSearchSerializer(categories, many=True)
+        serializer = CategoryItemsSearchSerializer(categories1, many=True, context={'request': request})
 
         return Response(serializer.data)
  
@@ -105,7 +105,7 @@ class CartItemAddView(APIView):
         
         user_cart = Cart.objects.get(user=self.request.user)
         cartitems = CartItem.objects.filter(cart=user_cart)
-        serializer = CartItemSerializer(cartitems, many=True)
+        serializer = CartItemSerializer(cartitems, many=True, context={'request': request})
         return Response(serializer.data)
     
     
@@ -121,7 +121,6 @@ class CartItemAddView(APIView):
             dish = Dish.objects.get(
                 pk=request.data['dish_id']
             )
-            # dish_id = int(request.data.get('dish_id'))
             quantity = int(request.data.get('quantity'))   
             
         except Exception as e:

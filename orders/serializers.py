@@ -25,14 +25,6 @@ class CartItemToOrderSerializer(serializers.ModelSerializer):
             'additives', 
             'extra'
         )
-        
-    
-    
-    # def get_dish_details(self, obj):
-        
-    #     cartitem = CartItem.objects.filter(cart=obj.cart)
- 
-    #     return CartDishSerializer(cartitem, many=True).data
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -65,8 +57,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
 
-    # user = UserSerializer(read_only=True)
-    # address = AddressSerializer(many=True,read_only=True)
     order_items = OrderItemSerializer(many=True,read_only=True)
 
     class Meta:
