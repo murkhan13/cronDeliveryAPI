@@ -34,7 +34,7 @@ class Dish(models.Model):
     #Model representing a dish to order 
     title           = models.CharField(("Навзание блюда"),max_length = 200, help_text='Назовите блюдо')
     price           = models.IntegerField(("Цена блюда"),help_text = 'Укажите цену')
-    image           = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = '002.jpg')
+    image           = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = 'not_found.jpg')
     description     = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
     portionWeight   = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
     category        = models.ManyToManyField(Category,
