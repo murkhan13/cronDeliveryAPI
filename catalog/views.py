@@ -127,7 +127,7 @@ class CartItemAddView(APIView):
 
         try:
             dish = Dish.objects.get(
-                pk=int(request.data['dish_id'])
+                pk=request.data['dish_id']
             )
             quantity = int(request.data.get('quantity'))   
             
@@ -138,7 +138,7 @@ class CartItemAddView(APIView):
             })
         try: 
             additives = DishAdditive.objects.get(
-                id=int(request.data['additives_id'])
+                id=request.data['additives_id']
             )
         except:
             additives = None
@@ -252,11 +252,6 @@ class CartItemAddView(APIView):
 
         if flag == False:
             try: 
-                '''domain = Site.objects.get_current().domain
-                obj = dish
-                path = obj.get_image_url()
-                image_url = 'https://{domain}{path}'.format(domain=domain, path=path)'''
-
                 new_cart_item = CartItem.objects.create( 
                         cart=cart,
                         title=dish.title,
