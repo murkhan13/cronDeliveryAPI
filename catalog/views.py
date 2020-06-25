@@ -47,14 +47,21 @@ class CategoryItemsSearchView(ListAPIView):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']    
         
-        categories = Category.objects.filter(dishes__title__icontains=search_term)
+        category_name = []
+        categoriees = Category.objects.filter(dishes__title__icontains=search_term)
+        for i in range(len(categoriees)):
+            category_name.append(categoriees[i])
+            print(category_name)
 
         # filtering given categories query for particular dishes
-        categories1 = categories.prefetch_related(
+        '''categories1 = categories.prefetch_related(
             Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
-        )
-
-        serializer = CategoryItemsSearchSerializer(categories1, many=True, context={'request': request})
+        )'''
+        categories = Category.objects.prefetch_related(
+            Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
+        ).filter(name__in=category_name)
+        
+        serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
 
         return Response(serializer.data)
  
@@ -102,10 +109,12 @@ class CartItemAddView(APIView):
         except:
             cart = Cart.objects.create(user=self.request.user)
             cart.save()
-        
+        context = {
+                "request": request,
+        }
         user_cart = Cart.objects.get(user=self.request.user)
         cartitems = CartItem.objects.filter(cart=user_cart)
-        serializer = CartItemSerializer(cartitems, many=True, context={'request': request})
+        serializer = CartItemSerializer(cartitems, many=True, context=context)
         return Response(serializer.data)
     
     
@@ -244,6 +253,7 @@ class CartItemAddView(APIView):
 
         if flag == False:
             try: 
+                # img = dish.get_image_url()
                 new_cart_item = CartItem.objects.create( 
                         cart=cart,
                         title=dish.title,
@@ -269,7 +279,8 @@ class CartItemAddView(APIView):
                 return Response({
                         "status": True
                 })
-            except:
+            except  Exception as e:
+                print(e)
                 return Response({
                     "status": False
                 }) 

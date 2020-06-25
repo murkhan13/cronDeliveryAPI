@@ -62,9 +62,6 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 class DishDetailSerializer(serializers.ModelSerializer):
     # image = Dish.get_image_url
-    image = serializers.ImageField(
-            max_length=None, use_url=True
-        )
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
@@ -79,7 +76,7 @@ class DishDetailSerializer(serializers.ModelSerializer):
 
 class CartDishSerializer(serializers.ModelSerializer):
 
-    image = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+    # image = serializers.ImageField(max_length=None, use_url=True)
     category    = CategoriesSerializer(many=True, read_only=True)
     additives   = DishAdditivesSerializer(many=True,read_only=True)
     extra       = DishExtrasSerializer(many=True,read_only=True)
