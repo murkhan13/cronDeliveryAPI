@@ -127,7 +127,7 @@ class CartItemAddView(APIView):
 
         try:
             dish = Dish.objects.get(
-                pk=request.data['dish_id']
+                pk=int(request.data['dish_id'])
             )
             quantity = int(request.data.get('quantity'))   
             
@@ -138,7 +138,7 @@ class CartItemAddView(APIView):
             })
         try: 
             additives = DishAdditive.objects.get(
-                id=request.data['additives_id']
+                id=int(request.data['additives_id'])
             )
         except:
             additives = None

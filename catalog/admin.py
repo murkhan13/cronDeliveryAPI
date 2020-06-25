@@ -29,12 +29,3 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Restaurant)
 
 #admin.site.register(Dish, ) DishAdmin
-
-'''
-class DishDetailsInline(admin.TabularInline):
-    fk_name = 'dish'
-    model = DishDetails
-
-class ProductAdmin(admin.ModelAdmin):
-    inlines = [CategoryInline]
-        '''
