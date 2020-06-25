@@ -8,8 +8,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .forms import UserAdminChangeForm, UserAdminCreationForm
-from .models import PhoneOTP
-
+from orders.models import Order, Address
 
 
 # from .models import Profile, PhoneOTP
@@ -20,6 +19,15 @@ from .models import PhoneOTP
 #     verbose_name_plural = 'Profile'
 #     fk_name = 'user'
 
+class OrderInline(admin.TabularInline):
+    fk_name = 'user'
+    model = Order
+
+class AddressInline(admin.TabularInline):
+    fk_name = 'user'
+    model = Address
+
+
 class UserAdmin(BaseUserAdmin):
     form = UserAdminChangeForm 
     add_form = UserAdminCreationForm
@@ -27,6 +35,8 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be use in displayin in the User model
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User
+    inlines = [AddressInline, OrderInline]
+
     list_display = [  'phone', 'name','admin' ]
     list_filter = [ 'staff', 'active', 'admin',]
     fieldsets = (
@@ -39,10 +49,10 @@ class UserAdmin(BaseUserAdmin):
             'fields': (
             'name',
         )}),
-        ('Permissions', {
-            'fields': (
-            'admin', 'staff', 'active'
-        )}),
+        # ('Permissions', {
+        #     'fields': (
+        #     'admin', 'staff', 'active'
+        # )}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to user attribute when creating a user.
@@ -62,6 +72,10 @@ class UserAdmin(BaseUserAdmin):
         if not obj:
             return list()
         return super(UserAdmin, self).get_inline_instances(request, obj)
+
+
+class UserAdminInlines(admin.TabularInline):
+    inlines = [AddressInline, OrderInline]
 
 
 admin.site.register(User, UserAdmin)

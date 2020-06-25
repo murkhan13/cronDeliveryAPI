@@ -20,20 +20,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'phone', 'name')
-    
 
 
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
-    name = serializers.CharField()
 
     def validate(self, data):
 
         phone = data.get('phone')
-        name = data.get('name')
-       
+
         if phone :
-            
             if User.objects.filter(phone = phone).exists():
                 user = User.objects.get(phone = phone)
                 print('details:', user.id)

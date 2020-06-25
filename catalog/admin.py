@@ -14,6 +14,7 @@ class DishInline(admin.TabularInline):
 
 
 class CategoryAdmin(admin.ModelAdmin):
+    fk = 'category'
     inlines =[
         DishInline,
     ]

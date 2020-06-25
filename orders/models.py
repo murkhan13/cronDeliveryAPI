@@ -39,7 +39,7 @@ class Order(models.Model):
                         message="Номер телефона должен быть в формате: '+999999999'.Разрешено до 14 цифр.")
     phone           = models.CharField(("Номер телефона"), validators = [phone_regex], max_length=15)
     total           = models.DecimalField(("Итоговая сумма"), max_digits=8, decimal_places=2, null=True, blank=True)
-    deliverTo       = models.CharField(("Доставить к"), max_length=255, default="Как можно быстрее")
+    deliverTo       = models.CharField(("Доставить к"), max_length=255)
 
     address         = models.CharField(("Адрес"), max_length=255)
 

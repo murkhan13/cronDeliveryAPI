@@ -51,16 +51,15 @@ class CategoryItemsSearchView(ListAPIView):
         categoriees = Category.objects.filter(dishes__title__icontains=search_term)
         for i in range(len(categoriees)):
             category_name.append(categoriees[i])
-            print(category_name)
 
-        # filtering given categories query for particular dishes
-        '''categories1 = categories.prefetch_related(
-            Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
-        )'''
+
+        # filtering given categories query for particular dishes, 
+        # and exclude categories with other names 
+        
         categories = Category.objects.prefetch_related(
             Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
         ).filter(name__in=category_name)
-        
+
         serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
 
         return Response(serializer.data)
@@ -253,7 +252,11 @@ class CartItemAddView(APIView):
 
         if flag == False:
             try: 
-                # img = dish.get_image_url()
+                '''domain = Site.objects.get_current().domain
+                obj = dish
+                path = obj.get_image_url()
+                image_url = 'https://{domain}{path}'.format(domain=domain, path=path)'''
+
                 new_cart_item = CartItem.objects.create( 
                         cart=cart,
                         title=dish.title,

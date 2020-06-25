@@ -158,6 +158,10 @@ class CartItem(models.Model):
 
     quantity = models.PositiveIntegerField(default=1)
 
+    @property
+    def get_absolute_image_url(self):
+        return "{0}{1}".format(settings.MEDIA_URL, self.image.url)
+
     def __unicode__(self):
-        return '%s: %s' %(self.dish.title, self.quantity)
+        return '%s: %s' %(self.title, self.quantity)
  
