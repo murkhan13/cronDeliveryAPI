@@ -68,7 +68,7 @@ class ValidatePhoneSendOTP(APIView):
                         phone = phone,
                         otp = key
                     )
-                        # send_sms(phone, key)
+                    send_sms(phone, key)
                     return Response({
                         'status': True,
                         "detail": "Номер телефона получен, введите код подтверждения",
@@ -112,7 +112,6 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             user = serializer.validated_data['user']
                             login(request,user)
                             old.delete()
-                            print("user:",request.user)
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
                             
                     else: 

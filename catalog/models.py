@@ -146,16 +146,15 @@ class CartItem(models.Model):
         blank=True,
         related_name="items"
     )
+    dish_id         = models.IntegerField("ID блюда")
     title           = models.CharField(("Навзание блюда"),max_length = 200)
     price           = models.IntegerField(("Цена блюда"))
     image           = models.ImageField(("Картинка блюда"))
     description     = models.CharField(("Описание блюда"),max_length = 200)
     portionWeight   = models.IntegerField(("Масса порции"))
     category        = models.ManyToManyField(Category)
-
     additives       = models.ManyToManyField(DishAdditive)
     extra           = models.ManyToManyField(DishExtra)
-
     quantity = models.PositiveIntegerField(default=1)
 
     @property

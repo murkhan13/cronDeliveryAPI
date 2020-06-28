@@ -61,7 +61,6 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class DishDetailSerializer(serializers.ModelSerializer):
-    # image = Dish.get_image_url
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
@@ -75,8 +74,6 @@ class DishDetailSerializer(serializers.ModelSerializer):
 
 
 class CartDishSerializer(serializers.ModelSerializer):
-
-    # image = serializers.ImageField(max_length=None, use_url=True)
     category    = CategoriesSerializer(many=True, read_only=True)
     additives   = DishAdditivesSerializer(many=True,read_only=True)
     extra       = DishExtrasSerializer(many=True,read_only=True)
@@ -85,6 +82,7 @@ class CartDishSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = (
             'id', 
+            'dish_id',
             'title', 
             'price',
             'image', 

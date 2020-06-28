@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Category, Dish, Restaurant, DishAdditive, DishExtra
-# Register your models here.
+from .models import *
+
+
 class DishAdditiveInline(admin.TabularInline):
     fk_name = 'dish'
     model = DishAdditive
@@ -27,5 +28,3 @@ admin.site.register(Dish, DishAdmin)
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Restaurant)
-
-#admin.site.register(Dish, ) DishAdmin

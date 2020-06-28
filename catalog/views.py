@@ -124,7 +124,6 @@ class CartItemAddView(APIView):
         except:
             cart = Cart.objects.create(id=self.request.user.id,user=self.request.user)
             cart.save()
-
         try:
             dish = Dish.objects.get(
                 pk=request.data['dish_id']
@@ -146,8 +145,7 @@ class CartItemAddView(APIView):
             extra_list = request.data.get('extra_id')
         except:
             extra_list = None
-        # extra_list = [int(s) for s in extra_id.split(',')]
-
+    
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
 
         if additives is not None and extra_list is not None:
@@ -254,6 +252,7 @@ class CartItemAddView(APIView):
             try: 
                 new_cart_item = CartItem.objects.create( 
                         cart=cart,
+                        dish_id = dish.id,
                         title=dish.title,
                         price=dish.price,
                         image=dish.image,
