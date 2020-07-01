@@ -29,7 +29,7 @@ class DishDetailView(RetrieveAPIView):
 class CategoryItemsView(ListModelMixin, GenericAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryItemsSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
     def get(self, request,*args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -68,7 +68,7 @@ class CategoryItemsSearchView(ListAPIView):
 
 class MenuPageView(ListModelMixin, GenericAPIView):
 
-    permission_classes = (IsAuthenticatedOrReadOnly, )
+    permission_classes = (AllowAny, )
     serializer_class = CategoryItemsView.serializer_class
     
 
