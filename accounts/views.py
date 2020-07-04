@@ -36,6 +36,8 @@ def send_otp(phone):
 
 
 class ValidatePhoneSendOTP(APIView):
+    permission_classes = (permissions.AllowAny,)
+
     def post(self, request, *args, **kwargs):
         phone_number = request.data.get('phone')
 
