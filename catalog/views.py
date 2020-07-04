@@ -215,12 +215,12 @@ class CartItemAddView(APIView):
                     addtv = existing_cart_item.additives.filter(name=additives)
                     if len(addtv) > 0:
                         flag = True
-                    # if flag:
-                    #     if len(extra_list) != len(existing_cart_item.extra.all()):
-                    #         flag = False
-                    #         continue
-                    #     if len(existing_cart_item.extra.all()) == 0:
-                    #         flag = True
+                    if flag:
+                        if len(existing_cart_item.extra.all()) > 0:
+                            flag = False
+                            continue
+                        if len(existing_cart_item.extra.all()) == 0:
+                            flag = True
                 if flag == True: 
                     existing_cart_item.quantity += quantity
                     existing_cart_item.save()
