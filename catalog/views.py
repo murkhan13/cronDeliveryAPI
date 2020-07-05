@@ -150,10 +150,10 @@ class CartItemAddView(APIView):
             extra_list = [int(n) for n in extras_string.split(',')]
         else:
             extra_list = None
-
+            
     
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
-        
+
         if additives is not None and extra_list is not None:
             flag = False
             for existing_cart_item in existing_cart_items:
