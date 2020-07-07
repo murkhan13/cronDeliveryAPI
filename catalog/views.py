@@ -8,6 +8,7 @@ from .models import *
 from django.shortcuts import get_object_or_404
 from itertools import chain
 from django.db.models import Prefetch, Q, FilteredRelation
+from cronProjectAPI.settings import ALLOWED_HOSTS 
 
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
@@ -255,13 +256,14 @@ class CartItemAddView(APIView):
                     break
 
         if flag == False:
+            img_url = 'https://' + ALLOWED_HOSTS[0] + dish.image.url
             try: 
                 new_cart_item = CartItem.objects.create( 
                         cart=cart,
                         dish_id = dish.id,
                         title=dish.title,
                         price=dish.price,
-                        image=dish.image,
+                        image=img_url,
                         description=dish.description,
                         portionWeight=dish.portionWeight,
                         quantity = quantity
