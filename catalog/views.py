@@ -282,12 +282,11 @@ class CartItemAddView(APIView):
                         obj = DishExtra.objects.get(pk=extra)
                         new_cart_item.extra.add(obj)
                 return Response({
-                        "status": True
+                        "status": True 
                 })
             except  Exception as e:
                 return Response({
-                    "status": False,
-                    "err": e
+                    "status": e
                 }) 
              
 class CartItemEditView(APIView):
