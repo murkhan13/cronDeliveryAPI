@@ -286,7 +286,7 @@ class CartItemAddView(APIView):
                 })
             except  Exception as e:
                 return Response({
-                    "status": e
+                    "status": False,
                 }) 
              
 class CartItemEditView(APIView):
