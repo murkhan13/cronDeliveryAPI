@@ -313,9 +313,14 @@ class CartItemEditView(APIView):
         except:
             additives = None
         try:
-            extra_list = request.data.get('extra_id')
+            extras_string = request.data.get('extra_id')
         except:
-            extra_list = None        
+            extras_string = None
+        
+        if extras_string is not None:
+            extra_list = [int(n) for n in extras_string.split(',')]
+        else:
+            extra_list = None    
         try:
             cartitem.quantity = quantity
             cartitem.save()
@@ -329,6 +334,8 @@ class CartItemEditView(APIView):
                 for extra in extra_list:
                     obj = DishExtra.objects.get(pk=extra)
                     cartitem.extra.add(obj)
+            else:
+                cartitem.extra.clear()
             return Response({
                 "status": True
             })
