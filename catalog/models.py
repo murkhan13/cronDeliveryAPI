@@ -149,7 +149,7 @@ class CartItem(models.Model):
     dish_id         = models.IntegerField("ID блюда")
     title           = models.CharField(("Навзание блюда"),max_length = 200)
     price           = models.IntegerField(("Цена блюда"))
-    image           = models.CharField(("Картинка Блюда"), max_length=200)
+    image           = models.CharField(("Картинка Блюда"), max_length=400)
     # image           = models.ImageField(("Картинка блюда"))
     description     = models.CharField(("Описание блюда"),max_length = 200)
     portionWeight   = models.IntegerField(("Масса порции"))
