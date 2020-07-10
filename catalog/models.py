@@ -9,8 +9,6 @@ from django.utils import timezone
 from accounts.models import User
 
 
-
-
 class Category(models.Model):
     # Model representing a dish category
     name = models.CharField(("Название категории"),max_length=200, help_text='Введите категорию блюда(например, супы, салаты, пицца и т.д.')
@@ -24,10 +22,8 @@ class Category(models.Model):
         return obj.name
     
     class Meta:
-        verbose_name = "categories"
+        verbose_name = "Категория"
         verbose_name_plural = "Категории"
-
-from django.urls import reverse
 
 
 class Dish(models.Model):
@@ -42,22 +38,16 @@ class Dish(models.Model):
                                 related_name='dishes'
                     )
     
-    
     class Meta:
         verbose_name_plural = "Блюда"
     
-    '''def get_absolute_image_url(self):
-        return os.path.join(settings.MEDIA_URL, self.image.url)'''
     def get_image_url(self, obj):
         return obj.image.url 
     
-
     def __str__(self):
         # String for representing the Model object.
         return self.title
 
-    # def get_absolute_url(self):
-    #     return reverse("dish-detail", args=[str(self.id)])
     def has_related_object(self):
         has_extra = False
         try:
@@ -65,7 +55,6 @@ class Dish(models.Model):
         except DishExtra.DoesNotExist:
             pass
         return has_extra and (self.car is not None)
-
     
 
 class DishAdditive(models.Model):
@@ -94,7 +83,6 @@ class DishExtra(models.Model):
         return self.name
 
 
-
 class Restaurant(models.Model):
     #categories = models.ForeignKey(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
     title       = models.CharField(("Название ресторана"),max_length = 200)
@@ -105,7 +93,6 @@ class Restaurant(models.Model):
     delivery    = models.IntegerField(("Стоимость доставки"))
     info        = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
     logo        = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
-
 
     class Meta: 
         verbose_name_plural = "Ресторан"
@@ -125,15 +112,7 @@ class Cart(models.Model):
         on_delete=models.CASCADE,
         default=None
         )
-    # created_at = models.DateTimeField(editable=False)
-    # updated_at = models.DateTimeField()
-        
-    # def save(self, *args, **kwargs):
-    #     ''' On save, update timestamps '''
-    #     if not self.id:
-    #         self.created_at = timezone.now()
-    #     self.updated_at = timezone.now()
-    #     return super(Cart, self).save(*args, **kwargs)
+
     class Meta: 
         verbose_name_plural = "Корзина"
 
@@ -150,13 +129,12 @@ class CartItem(models.Model):
     title           = models.CharField(("Навзание блюда"),max_length = 200)
     price           = models.IntegerField(("Цена блюда"))
     image           = models.CharField(("Картинка Блюда"), max_length=400)
-    # image           = models.ImageField(("Картинка блюда"))
     description     = models.CharField(("Описание блюда"),max_length = 200)
     portionWeight   = models.IntegerField(("Масса порции"))
     category        = models.ManyToManyField(Category)
     additives       = models.ManyToManyField(DishAdditive)
     extra           = models.ManyToManyField(DishExtra)
-    quantity = models.PositiveIntegerField(default=1)
+    quantity        = models.PositiveIntegerField(default=1)
 
     @property
     def get_absolute_image_url(self):

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'accounts',
     'knox',
     'orders',
+    'fcm_django'
 ]
 
 REST_FRAMEWORK = {
@@ -182,6 +183,10 @@ from datetime import timedelta
 REST_KNOX = {
     'USER_SERIALIZER': 'accounts.serializers.UserSerializer',
     'TOKEN_TTL': timedelta(hours= 24*60),
+}
+
+FCM_DJANGO_SETTINGS = {
+    "FCM_SERVER_KEY" "[AAAAL9hLaRs:APA91bEguNRPUIZGwUAS-0YIirqQqlZRYVsUyO4dWfr0zC2b-EgV57qrqFd_i16HsTTcOB-t6z8pfa4YElC-qfD-AzPKlzoSmlx_MH3yGOmGcRspSUlw9zyQZjEccGhzZF83BP4_vYnZ]"
 }
 
 
