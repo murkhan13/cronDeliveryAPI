@@ -116,7 +116,7 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             serializer = LoginSerializer(data = request.data)
                             serializer.is_valid(raise_exception=True)
                             user = serializer.validated_data['user']
-                            user_exists = serializer.validated_data['user_exists']
+
                             login(request,user)
                             old.delete()
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
@@ -186,4 +186,63 @@ class SetUserName(APIView):
             return Response({
                 'status': False,
                 'detail': 'Имя не отправлено!!!'
+            })
+
+class SetUserName(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self,request):
+        user_name = request.data.get('name', False)
+        if user_name:
+            user = self.request.user
+            user.name = user_name
+            user.save()
+            return Response({
+                'status': True,
+                'detail': 'Имя пользователя получено'
+            })
+        else:
+            return Response({
+                'status': False,
+                'detail': 'Имя не отправлено!!!'
+            })
+
+class ChangePhone(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self,request):
+        user_phone = request.data.get('phone', False)
+        otp_sent = request.data.get('otp', False)
+        if user_phone:
+            phone = str(user_phone)
+            old = PhoneOTP.objects.filter(phone__iexact = phone)
+            if old.exists():
+                old = old.first()
+                otp = old.otp
+                if str(otp_sent) == str(otp):
+                    user = self.request.user
+                    user.phone = phone
+                    user.save()
+                    old.delete()
+                    return Response({
+                        "status": True,
+                        "detail": "Номер телефона изменён"
+                    })         
+                else: 
+                    old.delete()
+                    return Response({
+                        'status': False,
+                        'detail': 'Код подтверждения неверный, повторите попытку'
+                    }) 
+            else: 
+                return Response({
+                    'status': False,
+                    'detail': 'Ошибка запроса, сначала отправьте номер телефона'
+                }) 
+        else:
+            return Response({
+                'status': False,
+                'detail': 'Номер телефона не отправлен'
             })
