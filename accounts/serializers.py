@@ -16,18 +16,33 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    
+    # user_exists = serializers.SerializerMethodField('user_existing')
+
     class Meta:
         model = User
         fields = ('id', 'phone', 'name')
+    
+    def user_existing(self, user):
+        user_exsts = User.objects.filter(phone__iexact=user.phone)
+        if user_exsts.exists():
+            user_exsts = True
+        else: 
+            user_exsts = False
+        return user_exsts
 
 
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
 
+
     def validate(self, data):
 
         phone = data.get('phone')
+        user_exists = User.objects.filter(phone__iexact=phone)
+        if user_exists is not None:
+            user_exists = True
+        else:
+            user_exists = False
 
         if phone :
             if User.objects.filter(phone = phone).exists():
@@ -55,6 +70,7 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg, code='authorization')
         
         data['user'] = user
+        data['user_exists'] = (user_exists)
         return data
 
 

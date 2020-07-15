@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'accounts',
     'knox',
     'orders',
-    'fcm_django'
+    # 'fcm_django'
 ]
 
 REST_FRAMEWORK = {
@@ -185,9 +185,10 @@ REST_KNOX = {
     'TOKEN_TTL': timedelta(hours= 24*60),
 }
 
+'''
 FCM_DJANGO_SETTINGS = {
     "FCM_SERVER_KEY" "[AAAAL9hLaRs:APA91bEguNRPUIZGwUAS-0YIirqQqlZRYVsUyO4dWfr0zC2b-EgV57qrqFd_i16HsTTcOB-t6z8pfa4YElC-qfD-AzPKlzoSmlx_MH3yGOmGcRspSUlw9zyQZjEccGhzZF83BP4_vYnZ]"
-}
+}'''
 
 
 ADMIN_PASSWORD = 'sha1$4e987$afbcf42e21bd417fb71db8c66b321e9fc33051de'

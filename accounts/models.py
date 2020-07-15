@@ -108,9 +108,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.phone
     
-    # def has_perm(self, perm, obj=None):
-    #     return True
-    
     def has_perm(self, perm, obj=None):
         return True
 

@@ -7,7 +7,8 @@ app_name = 'accounts'
 
 urlpatterns = [
     re_path(r'^validate_phone/', ValidatePhoneSendOTP.as_view()),
-    re_path("^auth/$", ValidateOtpAndAuthenticate.as_view()),   
+    re_path("^auth/$", ValidateOtpAndAuthenticate.as_view()), 
+    re_path(r'^set_name/', SetUserName.as_view())  
 ]
 
 '''re_path(r'^validate_phone_auth/', AuthValidatePhoneSendOTP.as_view()),

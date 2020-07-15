@@ -1,7 +1,11 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions, status, generics
+from rest_framework import  status, generics
+
+from knox.auth import TokenAuthentication
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
 
 from .models import User, PhoneOTP
 from .serializers import CreateUserSerializer, UserSerializer, LoginSerializer
@@ -36,7 +40,7 @@ def send_otp(phone):
 
 
 class ValidatePhoneSendOTP(APIView):
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         phone_number = request.data.get('phone')
@@ -70,7 +74,7 @@ class ValidatePhoneSendOTP(APIView):
                         phone = phone,
                         otp = key
                     )
-                    send_sms(phone, key)
+                    # send_sms(phone, key)
                     return Response({
                         'status': True,
                         "detail": "Номер телефона получен, введите код подтверждения",
@@ -90,12 +94,12 @@ class ValidatePhoneSendOTP(APIView):
 
 
 class ValidateOtpAndAuthenticate(KnoxLoginView):
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (AllowAny,)
 
     def post(self, request, format = None):
         phone = request.data.get('phone', False)
         otp_sent = request.data.get('otp', False)
-        name = request.data.get('name', False)
+        # name = request.data.get('name', False)
 
         if phone and otp_sent:
             user = User.objects.filter(phone__iexact=phone)
@@ -112,6 +116,7 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             serializer = LoginSerializer(data = request.data)
                             serializer.is_valid(raise_exception=True)
                             user = serializer.validated_data['user']
+                            user_exists = serializer.validated_data['user_exists']
                             login(request,user)
                             old.delete()
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
@@ -136,9 +141,9 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                         old.validated = True
                         old.save()
                         validated = old.validated
-                        if validated and name:
+                        if validated :
                             temp_data = {
-                            'name': name,
+                            # 'name': name,
                             'phone': phone,
                             }
                             serializer = CreateUserSerializer(data=temp_data)
@@ -149,7 +154,7 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             serializer.is_valid(raise_exception=True)
                             user = serializer.validated_data['user']
                             login(request,user)
-                            print("user:",request.user)
+
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
                     else: 
                         old.delete()
@@ -162,3 +167,23 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                         'status': False,
                         'detail': 'Ошибка запроса, сначала отправьте номер телефона'
                     })
+
+class SetUserName(APIView):
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self,request):
+        user_name = request.data.get('name', False)
+        if user_name:
+            user = self.request.user
+            user.name = user_name
+            user.save()
+            return Response({
+                'status': True,
+                'detail': 'Имя пользователя получено'
+            })
+        else:
+            return Response({
+                'status': False,
+                'detail': 'Имя не отправлено!!!'
+            })
