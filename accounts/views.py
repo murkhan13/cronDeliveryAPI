@@ -74,7 +74,7 @@ class ValidatePhoneSendOTP(APIView):
                         phone = phone,
                         otp = key
                     )
-                    # send_sms(phone, key)
+                    send_sms(phone, key)
                     return Response({
                         'status': True,
                         "detail": "Номер телефона получен, введите код подтверждения",
