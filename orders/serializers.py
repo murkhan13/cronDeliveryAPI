@@ -69,7 +69,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'orderStatus',
             'paymentMode',
             'order_items',
-
             'address',
             'deliverTo',
             'created_at', 

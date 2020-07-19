@@ -59,7 +59,6 @@ class OrderView(APIView):
             deliverTo=deliverTo,
             address = request.data['address'],
             personsAmount=request.data['personsAmount'],
-            orderStatus=request.data['orderStatus'],
             paymentMode=request.data['paymentMode']
             )
 
