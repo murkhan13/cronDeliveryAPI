@@ -158,6 +158,31 @@ class CategoryItemsSearchSerializer(serializers.ModelSerializer):
         
 
 class RestaurantSerializer(serializers.ModelSerializer):
+
     class Meta: 
         model = Restaurant
-        fields = ( 'title', 'workTime', 'minOrder', 'freeOrder', 'address', 'delivery', 'logo', 'info')
+        fields = ( 
+            'id',
+            'title', 
+            'workTime', 
+            'minOrder', 
+            'freeOrder', 
+            'address', 
+            'delivery', 
+            # 'maxDeliverDist', 
+            'logo', 
+            'info'
+        )
+
+
+class RestaurantMenuSerializer(serializers.ModelSerializer):
+    categories = CategoryItemsSerializer(many=True, read_only=True)
+    restaurant = RestaurantSerializer(read_only=True)
+
+    class Meta:
+        model = RestaurantMenu
+        fields = (
+            'categories', 
+            'restaurant'
+        )
+        

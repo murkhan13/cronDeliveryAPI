@@ -24,7 +24,7 @@ from rest_framework import filters
 class DishDetailView(RetrieveAPIView):
     queryset = Dish.objects.all()
     serializer_class = DishDetailSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
 
 class CategoryItemsView(ListModelMixin, GenericAPIView):
@@ -64,15 +64,46 @@ class CategoryItemsSearchView(ListAPIView):
         serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
 
         return Response(serializer.data)
- 
 
+
+class RestaurantView(ListModelMixin, GenericAPIView):
+    permission_classes = [AllowAny, ]
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantSerializer 
+
+    def get(self, request,*args, **kwargs):
+        return self.list(request, *args, **kwargs)
+        # here gonna be the the query of nearest restaurants
+
+
+class RestaurantMenuView(APIView):
+    permission_classes = [AllowAny, ]
+    queryset = RestaurantMenu.objects.all()
+    serializer_class = RestaurantMenuSerializer 
+
+    def get(self, request, *args, **kwargs):
+        # if 'search' in self.request.GET:
+        name = self.request.GET['name'] 
+
+        menu = RestaurantMenu.objects.filter(restaurant__title=name)
+
+        serializer = RestaurantMenuSerializer(menu, many=True, context={'request': request})
+
+        return Response(serializer.data)
+
+
+"""
+class RestaurantMenuView(RetrieveAPIView):
+    queryset = RestaurantMenu.objects.all()
+    serializer_class = RestaurantMenuSerializer
+    permission_classes = (AllowAny,)
+"""
 
 class MenuPageView(ListModelMixin, GenericAPIView):
 
     permission_classes = (AllowAny, )
     serializer_class = CategoryItemsView.serializer_class
     
-
     def get(self, request, *args, **kwargs):
         # get objects
         categories = Category.objects.all()

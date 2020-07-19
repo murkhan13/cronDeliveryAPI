@@ -9,7 +9,8 @@ urlpatterns = [
     re_path(r'^validate_phone/', ValidatePhoneSendOTP.as_view()),
     re_path("^auth/$", ValidateOtpAndAuthenticate.as_view()), 
     re_path(r'^set_name/', SetUserName.as_view()),
-    re_path(r'^change_phone', ChangePhone.as_view())
+    re_path(r'^change_phone', ChangePhone.as_view()),
+    re_path("^logout/$", knox_views.LogoutView.as_view())
 ]
 
 '''re_path(r'^validate_phone_auth/', AuthValidatePhoneSendOTP.as_view()),

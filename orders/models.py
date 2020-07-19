@@ -28,6 +28,19 @@ class Address(models.Model):
 
 
 class Order(models.Model):
+
+    PAYMENT_CHOICES = (
+        (u'H', u'Наличными курьеру'),
+        (u'K', u'Оплата картой курьеру'),
+        (u'G', u'Оплатить с помощью Google Pay'),
+        (u'A', u'Оплатить с помощью Apple Pay')
+    )
+    ORDER_STATUSES = (
+        (u'N', u'Новый'),
+        (u'P', u'В Пути'),
+        (u'D', u'Доставлен'),
+    )
+
     user            = models.ForeignKey(
                         User,
                         related_name='orders',
@@ -35,13 +48,17 @@ class Order(models.Model):
                         null=True,
                         blank=True,               
     )
-    phone_regex     = RegexValidator(regex=r'^\+?1?\d{9,14}$',
-                        message="Номер телефона должен быть в формате: '+999999999'.Разрешено до 14 цифр.")
+    phone_regex     = RegexValidator(regex=r'^\+?1?\d{9,20}$',
+                        message="Номер телефона должен быть в формате: '+999999999'.Разрешено до 20 символов.")
     phone           = models.CharField(("Номер телефона"), validators = [phone_regex], max_length=15)
     total           = models.DecimalField(("Итоговая сумма"), max_digits=8, decimal_places=2, null=True, blank=True)
     deliverTo       = models.CharField(("Доставить к"), max_length=255)
 
     address         = models.CharField(("Адрес"), max_length=255)
+
+    personsAmount   = models.IntegerField(("Количество персон"), default=1)
+    orderStatus     = models.CharField(("Статус Заказа"), max_length=100, choices=ORDER_STATUSES, default='N')
+    paymentMode     = models.CharField(("Способ оплаты"), max_length=100, default='Наличными курьеру')
 
     created_at      = models.DateTimeField( auto_now_add=True)
 

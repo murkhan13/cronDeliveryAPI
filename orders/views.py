@@ -57,7 +57,10 @@ class OrderView(APIView):
             phone=request.data['phone'], 
             total=request.data['total'],
             deliverTo=deliverTo,
-            address = request.data['address']
+            address = request.data['address'],
+            personsAmount=request.data['personsAmount'],
+            orderStatus=request.data['orderStatus'],
+            paymentMode=request.data['paymentMode']
             )
 
         order.save()

@@ -64,14 +64,16 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = (
             'id', 
             'user',
-            'address',
             'phone',
+            'personsAmount', 
+            'orderStatus',
+            'paymentMode',
+            'order_items',
+
+            'address',
             'deliverTo',
             'created_at', 
-            'order_items',
-            'address',
-            'created_at',
-            'total' 
+            
         )
     
     def create(self, validated_data):

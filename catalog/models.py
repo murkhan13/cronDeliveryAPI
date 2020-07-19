@@ -84,16 +84,19 @@ class DishExtra(models.Model):
 
 
 class Restaurant(models.Model):
-    #categories = models.ForeignKey(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
-    title       = models.CharField(("Название ресторана"),max_length = 200)
-    workTime    = models.CharField(("График работы"),max_length = 200, help_text='укажите ') 
-    minOrder    = models.IntegerField(("Минимальный заказ"),help_text='Минимальный заказ')
-    freeOrder   = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
-    address     = models.CharField(("Адрес ресторана"),max_length = 200)
-    delivery    = models.IntegerField(("Стоимость доставки"))
-    info        = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
-    logo        = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
-
+    categories = models.ForeignKey(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
+    title           = models.CharField(("Название ресторана"),max_length = 200)
+    workTime        = models.CharField(("График работы"),max_length = 200, help_text='укажите ') 
+    minOrder        = models.IntegerField(("Минимальный заказ"),help_text='Минимальный заказ')
+    freeOrder       = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
+    address         = models.CharField(("Адрес ресторана"),max_length = 200)
+    delivery        = models.IntegerField(("Стоимость доставки"))
+    # maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки"))
+    info            = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
+    logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
+    # latitude        = models.FloatField(("Широта"))
+    # longitude       = models.FloatField(("Долгота"))
+    
     class Meta: 
         verbose_name_plural = "Ресторан"
 
@@ -103,6 +106,17 @@ class Restaurant(models.Model):
     def get_image_url(self, obj):
         return obj.logo.url 
 
+
+class RestaurantMenu(models.Model):
+    categories  = models.ManyToManyField(Category, related_name = 'restaurants')
+    restaurant  = models.ForeignKey(Restaurant, on_delete=models.SET_NULL, null = True)
+
+    class Meta: 
+        verbose_name_plural = "Меню Ресторанов"
+        verbose_name = "Меню ресторана"
+
+    def __str__(self):
+        return self.restaurant.title
 
 
 class Cart(models.Model):
