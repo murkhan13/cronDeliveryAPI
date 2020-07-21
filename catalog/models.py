@@ -11,12 +11,16 @@ from accounts.models import User
 
 class Category(models.Model):
     # Model representing a dish category
-    name = models.CharField(("Название категории"),max_length=200, help_text='Введите категорию блюда(например, супы, салаты, пицца и т.д.')
-    
+    name    = models.CharField(("Название категории"),max_length=200, help_text='Введите категорию блюда(например, супы, салаты, пицца и т.д.')
+    image   = models.ImageField(("Картинка блюда"),upload_to="category_imgs", default = 'not_found.jpg')
+
     def __str__(self):
         # String for representing the Model object.
         return self.name 
     
+    def get_image_url(self, obj):
+        return obj.image.url 
+
     def get_category_name(self, obj):
 
         return obj.name
@@ -34,7 +38,7 @@ class Dish(models.Model):
     description     = models.CharField(("Описание блюда"),max_length = 200, help_text = 'Опишите блюдо')
     portionWeight   = models.IntegerField(("Масса порции"),help_text = "укажите массу порции")
     category        = models.ManyToManyField(Category,
-                                help_text='Выберите категорию(ии) блюда (для выбора нескольких категорий зажмите клавишу CTRL или Command на MacOS',
+                                help_text="Удерживайте CTRL или COMMAND на Mac, чтобы выбрать больше чем одну категорию.",
                                 related_name='dishes'
                     )
     
@@ -93,7 +97,7 @@ class Restaurant(models.Model):
     delivery        = models.IntegerField(("Стоимость доставки"))
     # maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки"))
     info            = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
-    logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = '002.jpg')
+    logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
     # latitude        = models.FloatField(("Широта"))
     # longitude       = models.FloatField(("Долгота"))
     
@@ -117,6 +121,21 @@ class RestaurantMenu(models.Model):
 
     def __str__(self):
         return self.restaurant.title
+
+
+class Offer(models.Model):
+    title       = models.CharField(("Название акции"),max_length=256)
+    discount    = models.FloatField(("Процент скидки"), default=0.0) 
+    image       = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
+
+    categories  = models.ManyToManyField(Category, help_text="Удерживайте CTRL или COMMAND на Mac, чтобы выбрать больше чем одну категорию.")
+
+    class Meta: 
+        verbose_name_plural = "Акция"
+        verbose_name = "Акции"
+    
+    def __str__(self):
+        return "{0} -{1}%".format(self.title, str(self.discount) )
 
 
 class Cart(models.Model):

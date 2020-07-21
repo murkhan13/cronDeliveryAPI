@@ -29,3 +29,6 @@ admin.site.register(Dish, DishAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Restaurant)
 admin.site.register(RestaurantMenu)
+
+
+admin.site.register(Offer)

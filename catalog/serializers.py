@@ -73,6 +73,68 @@ class DishDetailSerializer(serializers.ModelSerializer):
         return obj.image.url
 
 
+class CategoryItemsSerializer(serializers.ModelSerializer):
+    
+    dishes = DishDetailSerializer(many=True, read_only = True)
+    
+    class Meta:
+        model = Category
+        fields =  ['id', 'name','image', 'dishes']
+
+
+class CategoryItemsSearchSerializer(serializers.ModelSerializer):
+    
+    dishes = DishDetailSerializer(source='filtered_dishes', many=True, read_only=True)
+
+    class Meta:
+        model = Category
+        fields =  ['id', 'name', 'dishes']
+
+
+class RestaurantSerializer(serializers.ModelSerializer):
+    
+    class Meta: 
+        model = Restaurant
+        fields = ( 
+            'id',
+            'title', 
+            'workTime', 
+            'minOrder', 
+            'freeOrder', 
+            'address', 
+            'delivery', 
+            # 'maxDeliverDist', 
+            'logo', 
+            'info'
+        )
+
+
+class RestaurantMenuSerializer(serializers.ModelSerializer):
+    categories = CategoryItemsSerializer(many=True, read_only=True)
+    restaurant = RestaurantSerializer(read_only=True)
+
+    class Meta:
+        model = RestaurantMenu
+        fields = (
+            'categories', 
+            'restaurant'
+        )
+        
+
+class OfferSerializer(serializers.ModelSerializer):
+
+    categories = CategoryItemsSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Offer
+        fields = (
+            'title',
+            'discount',
+            'image',
+            'categories'
+        )
+
+
 class CartDishSerializer(serializers.ModelSerializer):
     category    = CategoriesSerializer(many=True, read_only=True)
     additives   = DishAdditivesSerializer(many=True,read_only=True)
@@ -109,7 +171,6 @@ class CartItemSerializer(serializers.ModelSerializer):
         
         cartitem = CartItem.objects.filter(id=obj.id)
         
- 
         return CartDishSerializer(cartitem, many=True).data
 
     '''def to_representation(self, instance):
@@ -129,60 +190,9 @@ class CartItemSerializer(serializers.ModelSerializer):
         }'''
     
 
-
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True,read_only=True)
 
     class Meta:
         model = Cart
-        fields = ('id', 'user', 'items')
-
-
-
-class CategoryItemsSerializer(serializers.ModelSerializer):
-    
-    dishes = DishDetailSerializer(many=True, read_only = True)
-    
-    class Meta:
-        model = Category
-        fields =  ['id', 'name', 'dishes']
-
-
-class CategoryItemsSearchSerializer(serializers.ModelSerializer):
-
-    dishes = DishDetailSerializer(source='filtered_dishes', many=True, read_only=True)
-
-    class Meta:
-        model = Category
-        fields =  ['id', 'name', 'dishes']
-        
-
-class RestaurantSerializer(serializers.ModelSerializer):
-
-    class Meta: 
-        model = Restaurant
-        fields = ( 
-            'id',
-            'title', 
-            'workTime', 
-            'minOrder', 
-            'freeOrder', 
-            'address', 
-            'delivery', 
-            # 'maxDeliverDist', 
-            'logo', 
-            'info'
-        )
-
-
-class RestaurantMenuSerializer(serializers.ModelSerializer):
-    categories = CategoryItemsSerializer(many=True, read_only=True)
-    restaurant = RestaurantSerializer(read_only=True)
-
-    class Meta:
-        model = RestaurantMenu
-        fields = (
-            'categories', 
-            'restaurant'
-        )
-        
+        fields = ('id', 'user', 'items')        

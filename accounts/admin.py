@@ -22,10 +22,12 @@ from orders.models import Order, Address
 class OrderInline(admin.TabularInline):
     fk_name = 'user'
     model = Order
+    readonly_fields = ('user', 'phone', 'total', 'deliverTo', 'address', 'personsAmount', 'paymentMode', 'created_at')
 
 class AddressInline(admin.TabularInline):
     fk_name = 'user'
     model = Address
+    readonly_fields = ('user', 'street', 'building', 'porch', 'floor', 'apartment', 'comment', 'created_at')
 
 
 class UserAdmin(BaseUserAdmin):
@@ -72,11 +74,6 @@ class UserAdmin(BaseUserAdmin):
         if not obj:
             return list()
         return super(UserAdmin, self).get_inline_instances(request, obj)
-
-
-class UserAdminInlines(admin.TabularInline):
-    inlines = [AddressInline, OrderInline]
-
 
 admin.site.register(User, UserAdmin)
 

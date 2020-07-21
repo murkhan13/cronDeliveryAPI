@@ -60,10 +60,14 @@ class Order(models.Model):
     orderStatus     = models.CharField(("Статус Заказа"), max_length=100, choices=ORDER_STATUSES, default='N')
     paymentMode     = models.CharField(("Способ оплаты"), max_length=100, default='Наличными курьеру')
 
-    created_at      = models.DateTimeField( auto_now_add=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
 
     class Meta: 
+        verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+
+    def __str__(self):
+        return "%s заказал %s" %(self.user, self.created_at)
 
 
 class OrderItem(models.Model):
@@ -78,9 +82,11 @@ class OrderItem(models.Model):
                         on_delete=models.CASCADE
                 )
     quantity        = models.PositiveIntegerField(("Количество"),null=True, blank=True)
-    
-    
 
+
+    class Meta: 
+        verbose_name = "Заказанное блюдо"
+        verbose_name_plural = "Заказанные блюда"
    
     def __unicode__(self):
         return '%s: %s' % (self.item.title, self.quantity)
