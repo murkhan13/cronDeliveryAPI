@@ -48,7 +48,7 @@ class Order(models.Model):
                         null=True,
                         blank=True,               
     )
-    phone_regex     = RegexValidator(regex=r'^\+?1?\d{9,20}$',
+    phone_regex     = RegexValidator(regex=r'^\+?1?\d{11,20}$',
                         message="Номер телефона должен быть в формате: '+999999999'.Разрешено до 20 символов.")
     phone           = models.CharField(("Номер телефона"), validators = [phone_regex], max_length=20)
     total           = models.DecimalField(("Итоговая сумма"), max_digits=8, decimal_places=2, null=True, blank=True)
