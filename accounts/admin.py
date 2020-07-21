@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.contrib.auth import get_user_model
 from django.contrib import admin
+from .models import *
 User = get_user_model()
 
 from django.contrib.auth.models import Group
@@ -76,6 +77,7 @@ class UserAdmin(BaseUserAdmin):
         return super(UserAdmin, self).get_inline_instances(request, obj)
 
 admin.site.register(User, UserAdmin)
+admin.site.register(PhoneOTP)
 
 # Removing Group Model from admin. We're not using it.
 admin.site.unregister(Group)
