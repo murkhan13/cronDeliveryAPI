@@ -46,30 +46,36 @@ class SearchInRestaurantView(ListAPIView):
 
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
-            search_term = self.request.GET['search']    
-            restaurant_title = self.request.GET['rest_title']
-            print("search:", search_term)
-        
-            category_names = []
-            categoriees = Category.objects.filter(dishes__title__icontains=search_term)
-            for i in range(len(categoriees)):
-                category_names.append(categoriees[i])
+            search_term = self.request.GET['search']  
+            if search_term != '':  
+                restaurant_title = self.request.GET['rest_title']
+                print("search:", search_term)
+            
+                category_names = []
+                categoriees = Category.objects.filter(dishes__title__icontains=search_term)
+                for i in range(len(categoriees)):
+                    category_names.append(categoriees[i])
 
-            # filtering given categories query for particular dishes, 
-            # and exclude categories with other names 
-            restaurant_obj = Restaurant.objects.get(title=restaurant_title)
+                # filtering given categories query for particular dishes, 
+                # and exclude categories with other names 
+                restaurant_obj = Restaurant.objects.get(title=restaurant_title)
 
-            categories = Category.objects.prefetch_related(
-                Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
-            ).filter(name__in=category_name).filter(restaurants__restaurant=restaurant_obj)
+                categories = Category.objects.prefetch_related(
+                    Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
+                ).filter(name__in=category_name).filter(restaurants__restaurant=restaurant_obj)
 
-            serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
+                serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
 
-            return Response(serializer.data)
+                return Response(serializer.data)
+            else:
+                return Response({
+                    'status': False,
+                    "detail": "Поле поиска пустое, попробуйте ещё раз"
+                })
         else:
             return Response({
                 "status": False,
-                "detail": "В поиске не было введено ничего, блюда не найдены"
+                "detail": "Ничего не найдено."
             })
 
 
@@ -79,30 +85,37 @@ class GlobalSearchView(APIView):
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']    
-            # restaurant_title = self.request.GET['rest_title']
-            print("search:", search_term)
-        
-            category_names = []
-            categorees = Category.objects.filter(dishes__title__icontains=search_term)
-            for i in range(len(categorees)):
-                category_names.append(categorees[i])
+            if search_term != '':
+                # restaurant_title = self.request.GET['rest_title']
+                print("search:", search_term)
+            
+                category_names = []
+                categorees = Category.objects.filter(dishes__title__icontains=search_term)
+                for i in range(len(categorees)):
+                    category_names.append(categorees[i])
 
-            # filtering given categories query for particular dishes, 
-            # and exclude categories with other names 
-            # restaurant_obj = Restaurant.objects.get(title=restaurant_title)
+                # filtering given categories query for particular dishes, 
+                # and exclude categories with other names 
+                # restaurant_obj = Restaurant.objects.get(title=restaurant_title)
 
-            queryset = RestaurantMenu.objects.prefetch_related(
-                Prefetch('categories', queryset=Category.objects.prefetch_related(
-                    Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
-                ).filter(name__in=category_names), to_attr='filtered_categories')
-            )
-            serializer = RestaurantMenuSerializer(queryset, many=True, context={'request': request})
+                queryset = RestaurantMenu.objects.prefetch_related(
+                    Prefetch('categories', queryset=Category.objects.prefetch_related(
+                        Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
+                    ).filter(name__in=category_names), to_attr='filtered_categories')
+                ).filter(categories__name__in = category_names)
 
-            return Response(serializer.data)
+                serializer = RestaurantMenuSerializer(queryset, many=True, context={'request': request})
+
+                return Response(serializer.data)
+            else:
+                return Response({
+                    'status': False,
+                    'detail': 'Поле поиска пустое, попробуйте ещё раз'
+                })
         else:
             return Response({
                 "status": False,
-                "detail": "В поиске не было введено ничего, блюда не найдены"
+                "detail": "Ничего не найдено."
             })
 
 class RestaurantView(ListModelMixin, GenericAPIView):
