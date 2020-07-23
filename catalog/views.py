@@ -48,8 +48,8 @@ class SearchInRestaurantView(ListAPIView):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']  
             if search_term != '':  
-                restaurant_title = self.request.GET['rest_title']
-                print("search:", search_term)
+                restaurant_title = self.request.GET['restaurant']
+                
             
                 category_names = []
                 categorees = Category.objects.filter(dishes__title__icontains=search_term)
@@ -58,7 +58,7 @@ class SearchInRestaurantView(ListAPIView):
 
                 # filtering given categories query for particular dishes, 
                 # and exclude categories with other names 
-                restaurant_obj = Restaurant.objects.get(title=restaurant_title)
+                restaurant_obj = Restaurant.objects.get(title='Safar Cafe')
 
                 categories = Category.objects.prefetch_related(
                     Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
