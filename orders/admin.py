@@ -2,16 +2,21 @@ from django.contrib import admin
 from .models import Order, OrderItem
 from catalog.models import CartItem 
 
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    readonly_fields = (
+        'title',
+    )
 
 class OrderItemInline(admin.TabularInline):
+    inlines = [CartItemInline,]
     model = OrderItem
     list_display = [
-                    'order_dish', 
-                    'quantity' 
+                    'quantity' ,
                    ]
     readonly_fields = (
-                        'order_dish', 
-                        'quantity'
+                        'order_dish',   
+                        'quantity',
                       )
 
 
@@ -27,7 +32,16 @@ class OrderAdmin(admin.ModelAdmin):
                     'orderStatus',
                     'created_at' 
                    ]
-
+    readonly_fields = [
+        'user', 
+        'phone', 
+        'total', 
+        'deliverTo',
+        'address', 
+        'personsAmount',
+        'paymentMode',
+        'created_at'
+    ]
 
 class OrderInline(admin.TabularInline):
     fk_name = 'user'

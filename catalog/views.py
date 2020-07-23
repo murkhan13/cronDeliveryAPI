@@ -36,7 +36,7 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
         return self.list(request, *args, **kwargs)
 
 
-class CategoryItemsSearchView(ListAPIView):
+class SearchInRestaurantView(ListAPIView):
     permission_classes = [AllowAny, ]
     queryset = Category.objects.all()
     serializer_class = CategoryItemsSearchSerializer 
@@ -47,34 +47,94 @@ class CategoryItemsSearchView(ListAPIView):
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']    
+            restaurant_title = self.request.GET['rest_title']
+            print("search:", search_term)
         
-        category_name = []
-        categoriees = Category.objects.filter(dishes__title__icontains=search_term)
-        for i in range(len(categoriees)):
-            category_name.append(categoriees[i])
+            category_names = []
+            categoriees = Category.objects.filter(dishes__title__icontains=search_term)
+            for i in range(len(categoriees)):
+                category_names.append(categoriees[i])
+
+            # filtering given categories query for particular dishes, 
+            # and exclude categories with other names 
+            restaurant_obj = Restaurant.objects.get(title=restaurant_title)
+
+            categories = Category.objects.prefetch_related(
+                Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
+            ).filter(name__in=category_name).filter(restaurants__restaurant=restaurant_obj)
+
+            serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
+
+            return Response(serializer.data)
+        else:
+            return Response({
+                "status": False,
+                "detail": "В поиске не было введено ничего, блюда не найдены"
+            })
 
 
-        # filtering given categories query for particular dishes, 
-        # and exclude categories with other names 
+class GlobalSearchView(ListAPIView):
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, *args, **kwargs):
+        if 'search' in self.request.GET:
+            search_term = self.request.GET['search']    
+            # restaurant_title = self.request.GET['rest_title']
+            print("search:", search_term)
         
-        categories = Category.objects.prefetch_related(
-            Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
-        ).filter(name__in=category_name)
+            category_names = []
+            categorees = Category.objects.filter(dishes__title__icontains=search_term)
+            for i in range(len(categorees)):
+                category_names.append(categorees[i])
 
-        serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
+            # filtering given categories query for particular dishes, 
+            # and exclude categories with other names 
+            # restaurant_obj = Restaurant.objects.get(title=restaurant_title)
 
-        return Response(serializer.data)
+            search_qs1 = RestaurantMenu.objects.prefetch_related(
+                Prefetch('categories', queryset=Category.objects.prefetch_related(
+                    Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
+                ).filter(name__in=category_names), to_attr='filtered_categories')
+            )
 
+            serializer = RestaurantMenuSerializer(search_qs1, many=True, context={'request': request})
+
+            return Response(serializer.data)
+        else:
+            return Response({
+                "status": False,
+                "detail": "В поиске не было введено ничего, блюда не найдены"
+            })
 
 class RestaurantView(ListModelMixin, GenericAPIView):
     permission_classes = [AllowAny, ]
     queryset = Restaurant.objects.all()
-    serializer_class = RestaurantSerializer 
+    serializer_class = RestaurantDetailSerializer 
 
     def get(self, request,*args, **kwargs):
         return self.list(request, *args, **kwargs)
         # here gonna be the the query of nearest restaurants
 
+"""
+class RestaurantMenuView(RetrieveAPIView):
+    queryset = Restaurant.objects.all()
+    permission_classes = (AllowAny,)
+
+    def get(self, request,*args, **kwargs):
+
+        context = {
+            'request': request
+        }
+
+        queryset = Restaurant.objects.all()
+        # restaurant_serializer = RestaurantDetailSerializer(queryset, context=context)
+        restaurant_menu_serializer = RestaurantMenuSerializer(queryset, many=True, context=context)
+
+        response = {restaurant_menu_serializer.data}
+
+        # return custom representation of data
+        return Response(response)
+"""
 
 class RestaurantMenuView(APIView):
     permission_classes = [AllowAny, ]
@@ -91,13 +151,6 @@ class RestaurantMenuView(APIView):
 
         return Response(serializer.data)
 
-
-"""
-class RestaurantMenuView(RetrieveAPIView):
-    queryset = RestaurantMenu.objects.all()
-    serializer_class = RestaurantMenuSerializer
-    permission_classes = (AllowAny,)
-"""
 
 class MenuPageView(ListModelMixin, GenericAPIView):
 

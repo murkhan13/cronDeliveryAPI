@@ -88,18 +88,21 @@ class DishExtra(models.Model):
 
 
 class Restaurant(models.Model):
-    categories = models.ForeignKey(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
+    
     title           = models.CharField(("Название ресторана"),max_length = 200)
+    logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
+    image           = models.ImageField(("Картинка ресторана"),upload_to="restaurant", default = 'not_found.jpg')
     workTime        = models.CharField(("График работы"),max_length = 200, help_text='укажите ') 
     minOrder        = models.IntegerField(("Минимальный заказ"),help_text='Минимальный заказ')
     freeOrder       = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
     address         = models.CharField(("Адрес ресторана"),max_length = 200)
     delivery        = models.IntegerField(("Стоимость доставки"))
-    # maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки"))
+    maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки(km)"), default=20)
     info            = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
-    logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
-    # latitude        = models.FloatField(("Широта"))
-    # longitude       = models.FloatField(("Долгота"))
+    # categories      = models.ManyToManyField(Category)
+    # categories = models.(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
+    latitude        = models.FloatField(("Широта"), blank=True, null=True)
+    longitude       = models.FloatField(("Долгота"), blank=True, null=True)
     
     class Meta: 
         verbose_name_plural = "Ресторан"
@@ -126,7 +129,7 @@ class RestaurantMenu(models.Model):
 class Offer(models.Model):
     title       = models.CharField(("Название акции"),max_length=256)
     discount    = models.FloatField(("Процент скидки"), default=0.0) 
-    image       = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
+    image       = models.ImageField(("Логотип Ресторана"),upload_to="offers", default = 'not_found.jpg')
 
     categories  = models.ManyToManyField(Category, help_text="Удерживайте CTRL или COMMAND на Mac, чтобы выбрать больше чем одну категорию.")
 
@@ -169,6 +172,8 @@ class CartItem(models.Model):
     extra           = models.ManyToManyField(DishExtra)
     quantity        = models.PositiveIntegerField(default=1)
 
+    def __str__(self):
+        return self.title
     @property
     def get_absolute_image_url(self):
         return "{0}{1}".format(settings.MEDIA_URL, self.image.url)

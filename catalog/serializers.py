@@ -91,34 +91,56 @@ class CategoryItemsSearchSerializer(serializers.ModelSerializer):
         fields =  ['id', 'name', 'dishes']
 
 
-class RestaurantSerializer(serializers.ModelSerializer):
+class RestaurantDetailSerializer(serializers.ModelSerializer):
     
     class Meta: 
         model = Restaurant
         fields = ( 
             'id',
             'title', 
+            'logo', 
+            'image',
             'workTime', 
             'minOrder', 
             'freeOrder', 
             'address', 
             'delivery', 
-            # 'maxDeliverDist', 
-            'logo', 
+            'maxDeliverDist', 
             'info'
         )
 
 
+"""
 class RestaurantMenuSerializer(serializers.ModelSerializer):
     categories = CategoryItemsSerializer(many=True, read_only=True)
-    restaurant = RestaurantSerializer(read_only=True)
+    restaurant = serializers.SerializerMethodField('get_restaurant')
+
+    class Meta:
+        model = Restaurant
+        fields = (
+            'categories',
+            'restaurant'
+        )
+
+    def get_restaurant(self, obj):
+        queryset = Restaurant.objects.filter(id=obj.id)
+
+        return RestaurantDetailSerializer(queryset).data
+"""
+
+
+class RestaurantMenuSerializer(serializers.ModelSerializer):
+    # categories = CategoryItemsSerializer(source='filtered_categories', many=True, read_only=True)
+    
+    categories = CategoryItemsSearchSerializer(source='filtered_categories', many=True, read_only=True)
+    restaurant = RestaurantDetailSerializer(read_only=True)
 
     class Meta:
         model = RestaurantMenu
         fields = (
             'categories', 
             'restaurant'
-        )
+        ) 
         
 
 class OfferSerializer(serializers.ModelSerializer):
