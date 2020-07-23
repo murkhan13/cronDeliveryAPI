@@ -52,9 +52,9 @@ class SearchInRestaurantView(ListAPIView):
                 print("search:", search_term)
             
                 category_names = []
-                categoriees = Category.objects.filter(dishes__title__icontains=search_term)
-                for i in range(len(categoriees)):
-                    category_names.append(categoriees[i])
+                categorees = Category.objects.filter(dishes__title__icontains=search_term)
+                for i in range(len(categorees)):
+                    category_names.append(categorees[i])
 
                 # filtering given categories query for particular dishes, 
                 # and exclude categories with other names 
@@ -62,7 +62,7 @@ class SearchInRestaurantView(ListAPIView):
 
                 categories = Category.objects.prefetch_related(
                     Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
-                ).filter(name__in=category_name).filter(restaurants__restaurant=restaurant_obj)
+                ).filter(name__in=category_names).filter(restaurants__restaurant=restaurant_obj)
 
                 serializer = CategoryItemsSearchSerializer(categories, many=True, context={'request': request})
 
