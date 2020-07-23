@@ -73,7 +73,7 @@ class SearchInRestaurantView(ListAPIView):
             })
 
 
-class GlobalSearchView(ListAPIView):
+class GlobalSearchView(APIView):
     permission_classes = [AllowAny, ]
 
     def get(self, request, *args, **kwargs):
@@ -91,13 +91,12 @@ class GlobalSearchView(ListAPIView):
             # and exclude categories with other names 
             # restaurant_obj = Restaurant.objects.get(title=restaurant_title)
 
-            search_qs1 = RestaurantMenu.objects.prefetch_related(
+            queryset = RestaurantMenu.objects.prefetch_related(
                 Prefetch('categories', queryset=Category.objects.prefetch_related(
                     Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
                 ).filter(name__in=category_names), to_attr='filtered_categories')
             )
-
-            serializer = RestaurantMenuSerializer(search_qs1, many=True, context={'request': request})
+            serializer = RestaurantMenuSerializer(queryset, many=True, context={'request': request})
 
             return Response(serializer.data)
         else:
