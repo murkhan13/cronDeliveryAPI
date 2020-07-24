@@ -171,6 +171,7 @@ class CartItem(models.Model):
     additives       = models.ManyToManyField(DishAdditive)
     extra           = models.ManyToManyField(DishExtra)
     quantity        = models.PositiveIntegerField(default=1)
+    created_at      = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.title
@@ -180,3 +181,7 @@ class CartItem(models.Model):
 
     def __unicode__(self):
         return '%s: %s' %(self.title, self.quantity)
+    
+    class Meta:
+
+        ordering = ['-created_at']
