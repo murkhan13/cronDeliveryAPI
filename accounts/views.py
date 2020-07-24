@@ -43,18 +43,21 @@ class ValidatePhoneSendOTP(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        phone_number = request.data.get('phone')
+        phone = request.data.get('phone')
+        
 
-        if phone_number:
-            phone = str(phone_number)
+        if phone:
+            phone = str(phone)
             user = User.objects.filter(phone__iexact=phone)
+            print(phoneToSMS)
+            print(phone)
 
             if user.exists():
                 user_exists = True
             else:
                 user_exists = False
 
-            key = send_otp(phone)
+            key = send_otp(phoneToSMS)
             if key:
                 old = PhoneOTP.objects.filter(phone__iexact=phone)
                 if old.exists():
@@ -63,6 +66,7 @@ class ValidatePhoneSendOTP(APIView):
                     count = old.count
                     old.count = count + 1
                     old.save()
+                    send_sms(phone, key)
                     return Response({
                         "status": True ,
                         "detail": "Номер телефона получен, введите код подтверждения",
@@ -102,6 +106,7 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
         # name = request.data.get('name', False)
 
         if phone and otp_sent:
+            phone = str(phone)
             user = User.objects.filter(phone__iexact=phone)
             if user.exists():
                 old = PhoneOTP.objects.filter(phone__iexact = phone)
@@ -137,6 +142,7 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                 if old.exists():
                     old = old.first()
                     otp = old.otp
+                    print(old.otp, otp)
                     if str(otp_sent) == str(otp):
                         old.validated = True
                         old.save()
@@ -146,9 +152,11 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             # 'name': name,
                             'phone': phone,
                             }
-                            serializer = CreateUserSerializer(data=temp_data)
-                            serializer.is_valid(raise_exception=True)
-                            user = serializer.save()
+                            user = User.objects.create(phone=phone)
+                            user.save()
+                            # serializer = CreateUserSerializer(data=temp_data)
+                            # serializer.is_valid(raise_exception=True)
+                            # user = serializer.save()
                             old.delete()
                             serializer = LoginSerializer(data = request.data)
                             serializer.is_valid(raise_exception=True)
@@ -216,8 +224,9 @@ class ChangePhone(APIView):
         user_phone = request.data.get('phone', False)
         otp_sent = request.data.get('otp', False)
         if user_phone:
+            phone_toSMS = user_phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
             phone = str(user_phone)
-            old = PhoneOTP.objects.filter(phone__iexact = phone)
+            old = PhoneOTP.objects.filter(phone__iexact = phone_toSMS)
             if old.exists():
                 old = old.first()
                 otp = old.otp
