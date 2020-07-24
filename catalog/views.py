@@ -180,7 +180,7 @@ class MenuPageView(ListModelMixin, GenericAPIView):
 
         # get data from serializers
         categories_serializer = CategoryItemsSerializer(categories, many=True, context=context)
-        restaurant_serializer = RestaurantSerializer(restaurant, many=True, context=context)
+        restaurant_serializer = RestaurantDetailSerializer(restaurant, many=True, context=context)
 
         # customize the response data
         response = {"categories":categories_serializer.data, "restaurant": restaurant_serializer.data[-1]}
