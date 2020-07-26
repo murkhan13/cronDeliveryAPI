@@ -11,6 +11,7 @@ urlpatterns = [
     path('find-all/', GlobalSearchView.as_view()),
     # path('restaurants/<int:pk>', RestaurantMenuView.as_view()),
     path('restaurants/menu/', RestaurantMenuView.as_view()),
+    path('favorite-restaurants/', FavoriteRestaurantsView.as_view() ),
     path('menu/', MenuPageView.as_view()),
     path('cart/add/', CartItemAddView.as_view()),
     path('cart/edit/', CartItemEditView.as_view()),

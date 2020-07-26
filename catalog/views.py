@@ -481,7 +481,7 @@ class CartDeleteView(APIView):
                 "status": False
             })
 
-class FavoriteRestaurants(APIView):
+class FavoriteRestaurantsView(APIView):
     serializer_class = CartSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -491,9 +491,28 @@ class FavoriteRestaurants(APIView):
         # if 'search' in self.request.GET:
         # restaurantName = self.request.GET['restaurantName'] 
 
-        menu = RestaurantMenu.objects.filter(restaurant__title=name)
+        restaurants_qs = Restaurant.objects.filter(likedUsers=self.request.user)
 
-        serializer = RestaurantMenuSerializer(menu, many=True, context={'request': request})
+        serializer = RestaurantDetailSerializer(restaurants_qs, many=True, context={'request': request})
 
         return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            restaurant_title = request.data.get('restaurant_title')
+        except:
+            return Response({
+                'status': False,
+                'detail': 'Ошибка добавления ресторана.'
+            })
+        
+        # user_liked = User.objects.get(pk=self.request.user.id)
+        restaurant = Restaurant.objects.get(title=restaurant_title)
+        restaurant.likedUsers.add(self.request.user)
+
+        return Response({
+            "status": True,
+            "detail": "Ресторан добавлен"
+        })
 
