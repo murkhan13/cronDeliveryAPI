@@ -49,7 +49,7 @@ class ValidatePhoneSendOTP(APIView):
         if phone:
             phone = str(phone)
             user = User.objects.filter(phone__iexact=phone)
-            print(phoneToSMS)
+            print(phone)
             print(phone)
 
             if user.exists():
@@ -57,7 +57,7 @@ class ValidatePhoneSendOTP(APIView):
             else:
                 user_exists = False
 
-            key = send_otp(phoneToSMS)
+            key = send_otp(phone)
             if key:
                 old = PhoneOTP.objects.filter(phone__iexact=phone)
                 if old.exists():

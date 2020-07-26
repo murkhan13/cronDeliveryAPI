@@ -206,7 +206,7 @@ class CartItemAddView(APIView):
             cart = Cart.objects.create(user=self.request.user)
             cart.save()
         context = {
-                "request": request,
+            "request": request,
         }
         user_cart = Cart.objects.get(user=self.request.user)
         cartitems = CartItem.objects.filter(cart=user_cart)

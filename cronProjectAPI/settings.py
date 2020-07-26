@@ -41,6 +41,8 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'catalog.apps.CatalogConfig',
+    'nested_admin',
+    # 'super_inlines',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

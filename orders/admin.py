@@ -1,37 +1,72 @@
 from django.contrib import admin
-from .models import Order, OrderItem
-from catalog.models import CartItem 
+import nested_admin
+# from super_inlines.admin import SuperInlineModelAdmin, SuperModelAdmin
 
-class CartItemInline(admin.TabularInline):
+from .models import Order, Address
+from catalog.models import CartItem, DishAdditive, DishExtra
+
+class DishAdditiveInline(nested_admin.NestedTabularInline):
+    fk_name = 'dish'
+    model = DishAdditive
+
+class DishExtraInline(nested_admin.NestedTabularInline):
+    fk_name = 'dish'
+    model = DishExtra
+
+class CartItemInline(nested_admin.NestedStackedInline):
+    fk = 'order'
     model = CartItem
+    # extra = 0
     readonly_fields = (
         'title',
+        'price',
+        'description',
+        'portionWeight',
+        'image',
+        'additives',
+        'extra',
+        'category',
+        'cart',
+        'order',
+        'quantity',
+        'dish_id',
+        'created_at'
     )
 
-class OrderItemInline(admin.TabularInline):
-    inlines = [CartItemInline,]
+
+"""
+class OrderItemInline(nested_admin.SortableHiddenMixin,
+                       nested_admin.NestedStackedInline):
+    #
     model = OrderItem
+    inlines = (CartItemInline,)
+    # extra = 0
     list_display = [
                     'quantity' ,
                    ]
     readonly_fields = (
                         'order_dish',   
                         'quantity',
-                      )
+                      )"""
 
 
-class OrderAdmin(admin.ModelAdmin):
-    inlines = [OrderItemInline,]
+class OrderAdmin(nested_admin.NestedModelAdmin):
+    
+    
+    inlines =[
+        CartItemInline,
+    ]
+    # inlines = ['CartItem']
     list_display = [
-                    'user',
-                    'phone',
-                    'total',
-                    'deliverTo',
-                    'address',
-                    'personsAmount',
-                    'orderStatus',
-                    'created_at' 
-                   ]
+        'user',
+        'phone',
+        'total',
+        'deliverTo',
+        'address',
+        'personsAmount',
+        'orderStatus',
+        'created_at' 
+    ]
     readonly_fields = [
         'user', 
         'phone', 
@@ -39,51 +74,10 @@ class OrderAdmin(admin.ModelAdmin):
         'deliverTo',
         'address', 
         'personsAmount',
+        # 'order_items',
         'paymentMode',
         'created_at'
     ]
 
-class OrderInline(admin.TabularInline):
-    fk_name = 'user'
-    model = Order
-    readonly_fields = ('user', 'phone', 'total', 'deliverTo', 'address', 'personsAmount', 'paymentMode', 'created_at')
-"""
-class AddressInline(admin.TabularInline):
-    fk_name = 'user'
-    model = Address
-    readonly_fields = ('user', 'street', 'building', 'porch', 'floor', 'apartment', 'comment', 'created_at')
-
-
-class UserAdmin(admin.ModelAdmin):
-    # form = UserAdminChangeForm 
-    # add_form = UserAdminCreationForm
-
-    # The fields to be use in displayin in the User model
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User
-    inlines = [AddressInline, OrderInline]
-
-    list_display = [  'phone', 'name','admin' ]
-    list_filter = [ 'staff', 'active', 'admin',]
-    fieldsets = (
-        (None, {
-            "fields": (
-                'phone', 
-            ),
-        }),
-        ('Personal info', {
-            'fields': (
-            'name',
-        )}),
-        # ('Permissions', {
-        #     'fields': (
-        #     'admin', 'staff', 'active'
-        # )}),
-    )
-
-    search_fields = ('phone',)
-    ordering = ('phone','name')
-    list_filter = ('phone', 'name')
-    filter_horizontal = ()  """
-
+admin.site.register(CartItem)
 admin.site.register(Order, OrderAdmin)

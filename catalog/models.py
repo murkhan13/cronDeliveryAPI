@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from accounts.models import User
+from orders.models import Order
 
 
 class Category(models.Model):
@@ -159,7 +160,16 @@ class CartItem(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="items"
+        related_name="items",
+        verbose_name="Корзина"
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_items",
+        verbose_name="Заказ"
     )
     dish_id         = models.IntegerField("ID блюда")
     title           = models.CharField(("Навзание блюда"),max_length = 200)
@@ -167,9 +177,9 @@ class CartItem(models.Model):
     image           = models.CharField(("Картинка Блюда"), max_length=400)
     description     = models.CharField(("Описание блюда"),max_length = 200)
     portionWeight   = models.IntegerField(("Масса порции"))
-    category        = models.ManyToManyField(Category)
-    additives       = models.ManyToManyField(DishAdditive)
-    extra           = models.ManyToManyField(DishExtra)
+    category        = models.ManyToManyField(Category, verbose_name="Категории")
+    additives       = models.ManyToManyField(DishAdditive, verbose_name="Добавки")
+    extra           = models.ManyToManyField(DishExtra, verbose_name="Дополнительно")
     quantity        = models.PositiveIntegerField(default=1)
     created_at      = models.DateTimeField(default=timezone.now)
 

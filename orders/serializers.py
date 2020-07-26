@@ -6,16 +6,15 @@ from orders.models import *
 from rest_framework import serializers
 
 
-class CartItemToOrderSerializer(serializers.ModelSerializer):
+class OrderDishSerializer(serializers.ModelSerializer):
 
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
-
+    
     class Meta:
         model = CartItem
         fields = (
-            'id', 
             'title', 
             'price',
             'image', 
@@ -23,8 +22,25 @@ class CartItemToOrderSerializer(serializers.ModelSerializer):
             'portionWeight',
             'category',
             'additives', 
-            'extra'
+            'extra',
         )
+
+class OrderItemSerilalizer(serializers.ModelSerializer):
+
+    order_dish = serializers.SerializerMethodField('get_order_dish')
+
+    class Meta:
+        model = CartItem
+        fields = (
+            'order_dish',
+            'quantity'
+        )
+    
+    def get_order_dish(self, obj):
+        
+        cartitem = CartItem.objects.filter(id=obj.id)
+        
+        return OrderDishSerializer(cartitem, many=True).data[0]
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -42,7 +58,7 @@ class AddressSerializer(serializers.ModelSerializer):
             "created_at"
         )
 
-
+"""
 class OrderItemSerializer(serializers.ModelSerializer):
     
     order_dish = CartItemToOrderSerializer(read_only=True)
@@ -52,12 +68,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = (
             'order_dish',
             'quantity',
-        )
+        )"""
 
 
 class OrderSerializer(serializers.ModelSerializer):
 
-    order_items = OrderItemSerializer(many=True,read_only=True)
+    order_items = OrderItemSerilalizer(many=True,read_only=True)
 
     class Meta:
         model = Order
@@ -72,7 +88,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'address',
             'deliverTo',
             'created_at', 
-            
         )
     
     def create(self, validated_data):

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from catalog.models import CartItem
+# from catalog.models import CartItem
 from django.core.validators import RegexValidator
 
 
@@ -45,22 +45,26 @@ class Order(models.Model):
                         User,
                         related_name='orders',
                         on_delete=models.CASCADE,
+                        verbose_name='Пользователь',
                         null=True,
                         blank=True,               
     )
+    orderStatus     = models.CharField(("Статус Заказа"), max_length=100, choices=ORDER_STATUSES, default='N')
     phone_regex     = RegexValidator(regex=r'^\+?1?\d{11,25}$',
                         message="Номер телефона должен быть в формате: '+999999999'.Разрешено до 20 символов.")
     phone           = models.CharField(("Номер телефона"), validators = [phone_regex], max_length=25)
     total           = models.DecimalField(("Итоговая сумма"), max_digits=8, decimal_places=2, null=True, blank=True)
     deliverTo       = models.CharField(("Доставить к"), max_length=255)
 
+    # order_items     = models.ManyToManyField(CartItem, verbose_name="Заказанные блюда")
+
     address         = models.CharField(("Адрес"), max_length=255)
 
     personsAmount   = models.IntegerField(("Количество персон"), default=1)
-    orderStatus     = models.CharField(("Статус Заказа"), max_length=100, choices=ORDER_STATUSES, default='N')
+    
     paymentMode     = models.CharField(("Способ оплаты"), max_length=100, default='Наличными курьеру')
 
-    created_at      = models.DateTimeField(auto_now_add=True)
+    created_at      = models.DateTimeField(("Заказ создан"),auto_now_add=True)
 
     class Meta: 
         verbose_name = "Заказ"
@@ -69,9 +73,9 @@ class Order(models.Model):
     def __str__(self):
         return "%s заказал %s" %(self.user, self.created_at)
 
-
+"""
 class OrderItem(models.Model):
-    """A model that contains data for an item in an order."""
+    A model that contains data for an item in an order.
     order           = models.ForeignKey(
                         Order,
                         related_name='order_items',
@@ -79,7 +83,10 @@ class OrderItem(models.Model):
                 )
     order_dish      = models.ForeignKey(
                         CartItem,
-                        on_delete=models.CASCADE
+                        on_delete=models.CASCADE,
+                        verbose_name="Блюда",
+                        null=True,
+                        blank=True,   
                 )
     quantity        = models.PositiveIntegerField(("Количество"),null=True, blank=True)
 
@@ -87,8 +94,9 @@ class OrderItem(models.Model):
     class Meta: 
         verbose_name = "Заказанное блюдо"
         verbose_name_plural = "Заказанные блюда"
+
+    def __str__(self):
+        return ''#"%s : %s" % (self.order_dish.title, self.quantity)
    
     def __unicode__(self):
-        return '%s: %s' % (self.item.title, self.quantity)
-    
-
+        return '%s: %s' % (self.order_dish.title, self.quantity)"""

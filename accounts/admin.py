@@ -32,7 +32,7 @@ class AddressInline(admin.TabularInline):
 
 
 class UserAdmin(BaseUserAdmin):
-    form = UserAdminChangeForm 
+    # form = UserAdminChangeForm 
     add_form = UserAdminCreationForm
 
     # The fields to be use in displayin in the User model

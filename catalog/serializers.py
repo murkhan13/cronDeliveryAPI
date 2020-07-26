@@ -193,7 +193,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         
         cartitem = CartItem.objects.filter(id=obj.id)
         
-        return CartDishSerializer(cartitem, many=True).data
+        return CartDishSerializer(cartitem, many=True).data[0]
 
     '''def to_representation(self, instance):
         return {

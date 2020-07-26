@@ -64,16 +64,21 @@ class OrderView(APIView):
 
         order.save()
 
+        for cart_item in cart.items.all():
+            cart_item.order = order
+            cart_item.save()
+        
+        """
         order_items = []
 
         
         for cart_item in cart.items.all():
             order_items.append(OrderItem(order=order, order_dish=cart_item, quantity=cart_item.quantity,))
 
-        OrderItem.objects.bulk_create(order_items)
+        OrderItem.objects.bulk_create(order_items)"""
         
         cart.items.clear()
-
+    
         user_order = Order.objects.filter(id=order.id)
 
         serializer = OrderSerializer(user_order, many=True)
