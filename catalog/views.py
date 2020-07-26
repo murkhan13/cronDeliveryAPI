@@ -480,3 +480,20 @@ class CartDeleteView(APIView):
             return ({
                 "status": False
             })
+
+class FavoriteRestaurants(APIView):
+    serializer_class = CartSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+
+    def get(self, request, *args, **kwargs):
+        # if 'search' in self.request.GET:
+        # restaurantName = self.request.GET['restaurantName'] 
+
+        menu = RestaurantMenu.objects.filter(restaurant__title=name)
+
+        serializer = RestaurantMenuSerializer(menu, many=True, context={'request': request})
+
+        return Response(serializer.data)
+

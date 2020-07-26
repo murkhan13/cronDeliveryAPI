@@ -53,6 +53,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
+
+
 class CategoriesSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -143,6 +145,17 @@ class RestaurantMenuSerializer(serializers.ModelSerializer):
         ) 
         
 
+class UserFavoriteRestaurants(serializers.ModelSerializer):
+
+    favoriteRestaurants = RestaurantDetailSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'favoriteRestaurants',
+        )
+
+
 class OfferSerializer(serializers.ModelSerializer):
 
     categories = CategoryItemsSerializer(many=True, read_only=True)
@@ -193,7 +206,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         
         cartitem = CartItem.objects.filter(id=obj.id)
         
-        return CartDishSerializer(cartitem, many=True).data[0]
+        return CartDishSerializer(cartitem, many=True).data
 
     '''def to_representation(self, instance):
         return {
