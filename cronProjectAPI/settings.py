@@ -41,6 +41,7 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'catalog.apps.CatalogConfig',
+    'feedbacks.apps.FeedbacksConfig', 
     'nested_admin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'accounts',
     'knox',
     'orders',
+
     # 'fcm_django'
 ]
 
