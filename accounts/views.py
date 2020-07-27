@@ -16,6 +16,7 @@ from django.contrib.auth import login
 import random
 
 from knox.views import LoginView as KnoxLoginView
+from knox.models import AuthToken
 from knox.auth import TokenAuthentication
 
 import requests
@@ -254,4 +255,16 @@ class ChangePhone(APIView):
             return Response({
                 'status': False,
                 'detail': 'Номер телефона не отправлен'
+            })
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+
+    
+    def post(self, request):
+        
+        AuthToken.objects.filter(user=request.user).delete()       
+        return Response({
+                "success": True
             })

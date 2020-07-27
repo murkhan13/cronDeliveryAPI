@@ -42,7 +42,6 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'catalog.apps.CatalogConfig',
     'nested_admin',
-    # 'super_inlines',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'django_filters',
     'accounts',
     'knox',
