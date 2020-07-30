@@ -60,6 +60,8 @@ class Order(models.Model):
 
     address         = models.CharField(("Адрес"), max_length=255)
 
+    comment         = models.CharField(("Комментарий"), max_length=255, null=True, blank=True)
+
     personsAmount   = models.IntegerField(("Количество персон"), default=1)
 
     paymentMode     = models.CharField(("Способ оплаты"), max_length=100, default='Наличными курьеру')

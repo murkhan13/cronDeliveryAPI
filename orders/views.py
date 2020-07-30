@@ -27,7 +27,6 @@ class OrderView(APIView):
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
-    
     def get(self, request, pk=None):
 
         user_orders = Order.objects.filter(user=self.request.user)
@@ -38,26 +37,26 @@ class OrderView(APIView):
 
     def post(self, request, pk=None):
 
-        try: 
+        try:
             purchaser_id = self.request.user.id
             purchaser = User.objects.get(id=purchaser_id)
             cart = Cart.objects.get(user=purchaser)
         except :
             raise serializers.ValidationError(
                 'Пользователь не найден'
-        )   
-        
-        
-        if 'deliverTo' in request.data: 
+        )
+
+        if 'deliverTo' in request.data:
             deliverTo = request.data['deliverTo']
-        else: 
+        else:
             deliverTo = 'Как можно быстрее'
         order = Order(
-            user=purchaser, 
-            phone=request.data['phone'], 
+            user=purchaser,
+            phone=request.data['phone'],
             total=request.data['total'],
             deliverTo=deliverTo,
             address = request.data['address'],
+            comment = request.data['comment'],
             personsAmount=request.data['personsAmount'],
             paymentMode=request.data['paymentMode']
             )
@@ -67,18 +66,17 @@ class OrderView(APIView):
         for cart_item in cart.items.all():
             cart_item.order = order
             cart_item.save()
-        
+
         """
         order_items = []
 
-        
         for cart_item in cart.items.all():
             order_items.append(OrderItem(order=order, order_dish=cart_item, quantity=cart_item.quantity,))
 
         OrderItem.objects.bulk_create(order_items)"""
-        
+
         cart.items.clear()
-    
+
         user_order = Order.objects.filter(id=order.id)
 
         serializer = OrderSerializer(user_order, many=True)
@@ -113,7 +111,7 @@ class AddressView(APIView):
 
     def post(self, request, pk=None):
 
-        try: 
+        try:
             street = request.data['street']
             building = request.data['building']
         except:
@@ -127,10 +125,10 @@ class AddressView(APIView):
         if 'floor' in request.data:
             floor = request.data['floor']
         else:
-            floor = None 
+            floor = None
         if 'apartment' in request.data:
             apartment = request.data['apartment']
-        else: 
+        else:
             apartment = None
         if 'comment' in request.data:
             comment = request.data['comment']
@@ -170,5 +168,3 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(user_queryset, many=True)
 
         return Response(serializer.data)
-
-        

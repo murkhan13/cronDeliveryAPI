@@ -15,13 +15,13 @@ class OrderDishSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = (
-            'title', 
+            'title',
             'price',
-            'image', 
+            'image',
             'description',
             'portionWeight',
             'category',
-            'additives', 
+            'additives',
             'extra',
         )
 
@@ -35,11 +35,11 @@ class OrderItemSerilalizer(serializers.ModelSerializer):
             'order_dish',
             'quantity'
         )
-    
+
     def get_order_dish(self, obj):
-        
+
         cartitem = CartItem.objects.filter(id=obj.id)
-        
+
         return OrderDishSerializer(cartitem, many=True).data[0]
 
 
@@ -49,7 +49,7 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = (
             'id',
-            "street", 
+            "street",
             "building",
             "porch",
             "floor",
@@ -60,7 +60,6 @@ class AddressSerializer(serializers.ModelSerializer):
 
 """
 class OrderItemSerializer(serializers.ModelSerializer):
-    
     order_dish = CartItemToOrderSerializer(read_only=True)
 
     class Meta:
@@ -78,20 +77,21 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = (
-            'id', 
+            'id',
             'user',
             'phone',
-            'personsAmount', 
+            'personsAmount',
             'orderStatus',
             'paymentMode',
             'order_items',
             'address',
+            'comment',
             'deliverTo',
-            'created_at', 
+            'created_at',
         )
-    
+
     def create(self, validated_data):
-        
+
         validated_data: dict
 
         order = Order.objects.create(**validated_data)
@@ -102,6 +102,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
     adresses = AddressSerializer(many=True, read_only=True)
     orders = OrderSerializer(many=True, read_only=True)
 
-    class Meta: 
+    class Meta:
         model = User
         fields = ('id', 'phone', 'name', 'adresses', 'orders')
