@@ -47,7 +47,7 @@ class Order(models.Model):
                         on_delete=models.CASCADE,
                         verbose_name='Пользователь',
                         null=True,
-                        blank=True,               
+                        blank=True
     )
     orderStatus     = models.CharField(("Статус Заказа"), max_length=100, choices=ORDER_STATUSES, default='N')
     phone_regex     = RegexValidator(regex=r'^\+?1?\d{11,25}$',
@@ -61,12 +61,12 @@ class Order(models.Model):
     address         = models.CharField(("Адрес"), max_length=255)
 
     personsAmount   = models.IntegerField(("Количество персон"), default=1)
-    
+
     paymentMode     = models.CharField(("Способ оплаты"), max_length=100, default='Наличными курьеру')
 
     created_at      = models.DateTimeField(("Заказ создан"),auto_now_add=True)
 
-    class Meta: 
+    class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
 
@@ -86,17 +86,17 @@ class OrderItem(models.Model):
                         on_delete=models.CASCADE,
                         verbose_name="Блюда",
                         null=True,
-                        blank=True,   
+                        blank=True,
                 )
     quantity        = models.PositiveIntegerField(("Количество"),null=True, blank=True)
 
 
-    class Meta: 
+    class Meta:
         verbose_name = "Заказанное блюдо"
         verbose_name_plural = "Заказанные блюда"
 
     def __str__(self):
         return ''#"%s : %s" % (self.order_dish.title, self.quantity)
-   
+
     def __unicode__(self):
         return '%s: %s' % (self.order_dish.title, self.quantity)"""

@@ -9,4 +9,8 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feedback
-        fields = "__all__"
+        fields = (
+            'overalRate',
+            'pros', 
+            'cons'
+        )

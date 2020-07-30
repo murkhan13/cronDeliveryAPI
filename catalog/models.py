@@ -17,22 +17,22 @@ class Category(models.Model):
 
     def __str__(self):
         # String for representing the Model object.
-        return self.name 
-    
+        return self.name
+
     def get_image_url(self, obj):
-        return obj.image.url 
+        return obj.image.url
 
     def get_category_name(self, obj):
 
         return obj.name
-    
+
     class Meta:
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
 
 class Dish(models.Model):
-    #Model representing a dish to order 
+    #Model representing a dish to order
     title           = models.CharField(("Навзание блюда"),max_length = 200, help_text='Назовите блюдо')
     price           = models.IntegerField(("Цена блюда"),help_text = 'Укажите цену')
     image           = models.ImageField(("Картинка блюда"),upload_to="dishes_imgs", default = 'not_found.jpg')
@@ -42,13 +42,13 @@ class Dish(models.Model):
                                 help_text="Удерживайте CTRL или COMMAND на Mac, чтобы выбрать больше чем одну категорию.",
                                 related_name='dishes'
                     )
-    
+
     class Meta:
         verbose_name_plural = "Блюда"
-    
+
     def get_image_url(self, obj):
-        return obj.image.url 
-    
+        return obj.image.url
+
     def __str__(self):
         # String for representing the Model object.
         return self.title
@@ -60,7 +60,7 @@ class Dish(models.Model):
         except DishExtra.DoesNotExist:
             pass
         return has_extra and (self.car is not None)
-    
+
 
 class DishAdditive(models.Model):
     dish        = models.ForeignKey(Dish, on_delete=models.CASCADE,related_name="additives", default='')
@@ -68,12 +68,12 @@ class DishAdditive(models.Model):
     addPrice    = models.IntegerField(("Цена"),help_text="укажите цену")
     active      = models.BooleanField(("Добавить"))
 
-    class Meta: 
+    class Meta:
          verbose_name_plural = "Добавки к блюду"
 
     def __str__(self):
         return self.name
-    
+
 
 class DishExtra(models.Model):
     dish    = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name="extra", default='')
@@ -83,13 +83,13 @@ class DishExtra(models.Model):
 
     class Meta:
         verbose_name_plural = "Дополнительно к блюду"
-    
+
     def __str__(self):
         return self.name
 
 
 class Restaurant(models.Model):
-    
+
     title           = models.CharField(("Название ресторана"),max_length = 200)
     logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
     image           = models.ImageField(("Картинка ресторана"),upload_to="restaurant", default = 'not_found.jpg')
@@ -104,23 +104,23 @@ class Restaurant(models.Model):
     # categories = models.(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
     latitude        = models.FloatField(("Широта"), blank=True, null=True)
     longitude       = models.FloatField(("Долгота"), blank=True, null=True)
-    likedUsers      = models.ManyToManyField(User, related_name="favoriteRestaurants")
-    
-    class Meta: 
+    likedUsers      = models.ManyToManyField(User, related_name="favoriteRestaurants", blank=True, null=True)
+
+    class Meta:
         verbose_name_plural = "Ресторан"
 
     def __str__(self):
         return self.title
 
     def get_image_url(self, obj):
-        return obj.logo.url 
+        return obj.logo.url
 
 
 class RestaurantMenu(models.Model):
     categories  = models.ManyToManyField(Category, related_name = 'restaurants')
     restaurant  = models.ForeignKey(Restaurant, on_delete=models.SET_NULL, null = True)
 
-    class Meta: 
+    class Meta:
         verbose_name_plural = "Меню Ресторанов"
         verbose_name = "Меню ресторана"
 
@@ -130,15 +130,15 @@ class RestaurantMenu(models.Model):
 
 class Offer(models.Model):
     title       = models.CharField(("Название акции"),max_length=256)
-    discount    = models.FloatField(("Процент скидки"), default=0.0) 
+    discount    = models.FloatField(("Процент скидки"), default=0.0)
     image       = models.ImageField(("Логотип Ресторана"),upload_to="offers", default = 'not_found.jpg')
 
     categories  = models.ManyToManyField(Category, help_text="Удерживайте CTRL или COMMAND на Mac, чтобы выбрать больше чем одну категорию.")
 
-    class Meta: 
+    class Meta:
         verbose_name_plural = "Акция"
         verbose_name = "Акции"
-    
+
     def __str__(self):
         return "{0} -{1}%".format(self.title, str(self.discount) )
 
@@ -151,7 +151,7 @@ class Cart(models.Model):
         default=None
         )
 
-    class Meta: 
+    class Meta:
         verbose_name_plural = "Корзина"
 
 
@@ -192,7 +192,6 @@ class CartItem(models.Model):
 
     def __unicode__(self):
         return '%s: %s' %(self.title, self.quantity)
-    
     class Meta:
 
         ordering = ['-created_at']

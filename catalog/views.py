@@ -39,25 +39,23 @@ class CategoryItemsView(ListModelMixin, GenericAPIView):
 class SearchInRestaurantView(ListAPIView):
     permission_classes = [AllowAny, ]
     queryset = Category.objects.all()
-    serializer_class = CategoryItemsSearchSerializer 
+    serializer_class = CategoryItemsSearchSerializer
     # filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
     # search_fields = ['dishes__title']
-    
 
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
-            search_term = self.request.GET['search']  
-            if search_term != '':  
+            search_term = self.request.GET['search']
+            if search_term != '':
                 restaurant_title = self.request.GET['restaurant']
-                
-            
+
                 category_names = []
                 categorees = Category.objects.filter(dishes__title__icontains=search_term)
                 for i in range(len(categorees)):
                     category_names.append(categorees[i])
 
-                # filtering given categories query for particular dishes, 
-                # and exclude categories with other names 
+                # filtering given categories query for particular dishes,
+                # and exclude categories with other names
                 restaurant_obj = Restaurant.objects.get(title='Safar Cafe')
 
                 categories = Category.objects.prefetch_related(
@@ -84,18 +82,18 @@ class GlobalSearchView(APIView):
 
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
-            search_term = self.request.GET['search']    
+            search_term = self.request.GET['search']
             if search_term != '':
                 # restaurant_title = self.request.GET['rest_title']
                 print("search:", search_term)
-            
+
                 category_names = []
                 categorees = Category.objects.filter(dishes__title__icontains=search_term)
                 for i in range(len(categorees)):
                     category_names.append(categorees[i])
 
-                # filtering given categories query for particular dishes, 
-                # and exclude categories with other names 
+                # filtering given categories query for particular dishes,
+                # and exclude categories with other names
                 # restaurant_obj = Restaurant.objects.get(title=restaurant_title)
 
                 queryset = RestaurantMenu.objects.prefetch_related(
@@ -121,7 +119,7 @@ class GlobalSearchView(APIView):
 class RestaurantView(ListModelMixin, GenericAPIView):
     permission_classes = [AllowAny, ]
     queryset = Restaurant.objects.all()
-    serializer_class = RestaurantDetailSerializer 
+    serializer_class = RestaurantDetailSerializer
 
     def get(self, request,*args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -151,11 +149,11 @@ class RestaurantMenuView(RetrieveAPIView):
 class RestaurantMenuView(APIView):
     permission_classes = [AllowAny, ]
     queryset = RestaurantMenu.objects.all()
-    serializer_class = RestaurantMenuSerializer 
+    serializer_class = RestaurantMenuSerializer
 
     def get(self, request, *args, **kwargs):
         # if 'search' in self.request.GET:
-        name = self.request.GET['name'] 
+        name = self.request.GET['name']
 
         menu = RestaurantMenu.objects.filter(restaurant__title=name)
 
@@ -168,7 +166,7 @@ class MenuPageView(ListModelMixin, GenericAPIView):
 
     permission_classes = (AllowAny, )
     serializer_class = CategoryItemsView.serializer_class
-    
+
     def get(self, request, *args, **kwargs):
         # get objects
         categories = Category.objects.all()
@@ -212,8 +210,8 @@ class CartItemAddView(APIView):
         cartitems = CartItem.objects.filter(cart=user_cart)
         serializer = CartItemSerializer(cartitems, many=True, context=context)
         return Response(serializer.data)
-    
-    
+
+
     def post(self, request, pk=None):
 
         try:
@@ -225,14 +223,14 @@ class CartItemAddView(APIView):
             dish = Dish.objects.get(
                 pk=request.data['dish_id']
             )
-            quantity = int(request.data.get('quantity'))   
-            
+            quantity = int(request.data.get('quantity'))
+
         except Exception as e:
             return Response({
                 'status': False,
                 'detail': "Ошибка при добавлении в корзину"
             })
-        try: 
+        try:
             additives = DishAdditive.objects.get(
                 id=request.data['additives_id']
             )
@@ -242,19 +240,22 @@ class CartItemAddView(APIView):
             extras_string = request.data.get('extra_id')
         except:
             extras_string = None
-        
+
         if extras_string is not None:
             extra_list = [int(n) for n in extras_string.split(',')]
         else:
             extra_list = None
-            
-    
+
+
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
 
+        # checking if the adding cart item has a similarity to cart items already added to cart
+        # if flag = True the similar cart item  founded and quantity of this item increased
+        # if flag = False the similar doesn't founded and creating a new object
         if additives is not None and extra_list is not None:
             flag = False
             for existing_cart_item in existing_cart_items:
-                flag = False 
+                flag = False
                 if len(existing_cart_item.additives.all()) == 0:
                     flag = False
                 elif len(existing_cart_item.additives.all()) > 0:
@@ -274,15 +275,14 @@ class CartItemAddView(APIView):
                                     check += 1
                             if check == len(existing_cart_item.extra.all()):
                                 flag=True
-                if flag == True: 
+                if flag == True:
                     existing_cart_item.quantity += quantity
                     existing_cart_item.save()
                     return Response({
                         "status": True
                     })
                     break
-                            
-        
+
         if additives is None and extra_list is not None:
             flag = False
             for existing_cart_item in existing_cart_items:
@@ -301,17 +301,17 @@ class CartItemAddView(APIView):
                                 check += 1
                         if check == len(existing_cart_item.extra.all()):
                             flag=True
-                if flag == True: 
+                if flag == True:
                     existing_cart_item.quantity += quantity
                     existing_cart_item.save()
                     return Response({
                         "status": True
                     })
                     break
-        
+
         if additives is not None and extra_list is None:
             flag = False
-            for existing_cart_item in existing_cart_items: 
+            for existing_cart_item in existing_cart_items:
                 if len(existing_cart_item.additives.all()) == 0:
                     flag = False
                 elif len(existing_cart_item.additives.all()) > 0:
@@ -324,14 +324,14 @@ class CartItemAddView(APIView):
                             continue
                         if len(existing_cart_item.extra.all()) == 0:
                             flag = True
-                if flag == True: 
+                if flag == True:
                     existing_cart_item.quantity += quantity
                     existing_cart_item.save()
                     return Response({
                         "status": True
                     })
-                    break            
-        
+                    break
+
         if additives is None and extra_list is None:
             flag = False
             for existing_cart_item in existing_cart_items:
@@ -342,8 +342,8 @@ class CartItemAddView(APIView):
                         flag = False
                     elif len(existing_cart_item.extra.all()) == 0:
                         flag = True
-                
-                if flag == True: 
+
+                if flag == True:
                     existing_cart_item.quantity += quantity
                     existing_cart_item.save()
                     return Response({
@@ -353,8 +353,8 @@ class CartItemAddView(APIView):
 
         if flag == False:
             img_url = 'https://' + ALLOWED_HOSTS[0] + dish.image.url
-            try: 
-                new_cart_item = CartItem.objects.create( 
+            try:
+                new_cart_item = CartItem.objects.create(
                         cart=cart,
                         dish_id = dish.id,
                         title=dish.title,
@@ -372,19 +372,19 @@ class CartItemAddView(APIView):
 
                 if additives is not None:
                     new_cart_item.additives.add(additives)
-            
+
                 if extra_list is not None:
                     for extra in extra_list:
                         obj = DishExtra.objects.get(pk=extra)
                         new_cart_item.extra.add(obj)
                 return Response({
-                        "status": True 
+                        "status": True
                 })
             except  Exception as e:
                 return Response({
                     "status": False,
-                }) 
-             
+                })
+
 class CartItemEditView(APIView):
 
     def post(self,request,pk=None):
@@ -401,7 +401,7 @@ class CartItemEditView(APIView):
                 'detail': "Ошибка запроса при изменении товаров в корзине"
             })
 
-        try: 
+        try:
             additives = DishAdditive.objects.get(
                 id=request.data['additives_id']
             )
@@ -411,11 +411,11 @@ class CartItemEditView(APIView):
             extras_string = request.data.get('extra_id')
         except:
             extras_string = None
-        
+
         if extras_string is not None:
             extra_list = [int(n) for n in extras_string.split(',')]
         else:
-            extra_list = None    
+            extra_list = None
         try:
             cartitem.quantity = quantity
             cartitem.save()
@@ -423,7 +423,7 @@ class CartItemEditView(APIView):
             if additives is not None:
                 cartitem.additives.clear()
                 cartitem.additives.add(additives)
-            
+
             if extra_list is not None:
                 cartitem.extra.clear()
                 for extra in extra_list:
@@ -459,7 +459,7 @@ class CartItemDeleteView(APIView):
                 "status": True
             })
         except:
-            
+
             return Response({
                 "status": False
             })
@@ -489,7 +489,7 @@ class FavoriteRestaurantsView(APIView):
 
     def get(self, request, *args, **kwargs):
         # if 'search' in self.request.GET:
-        # restaurantName = self.request.GET['restaurantName'] 
+        # restaurantName = self.request.GET['restaurantName']
 
         restaurants_qs = Restaurant.objects.filter(likedUsers=self.request.user)
 
@@ -506,7 +506,7 @@ class FavoriteRestaurantsView(APIView):
                 'status': False,
                 'detail': 'Ошибка добавления ресторана.'
             })
-        
+
         # user_liked = User.objects.get(pk=self.request.user.id)
         restaurant = Restaurant.objects.get(title=restaurant_title)
         restaurant.likedUsers.add(self.request.user)
