@@ -11,7 +11,7 @@ class OrderDishSerializer(serializers.ModelSerializer):
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = CartItem
         fields = (

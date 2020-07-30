@@ -8,12 +8,18 @@ User = get_user_model()
 
 
 class Address(models.Model):
+    """
+    The model class that represent an user addresses
+
+    Args:
+        models ([class]): [description]
+    """
     user            = models.ForeignKey(
                         User,
                         related_name='adresses',
                         on_delete=models.CASCADE,
                         null=True,
-                        blank=True,               
+                        blank=True,
     )
     street          = models.CharField(("Улица"),max_length=255)
     building        = models.CharField(("Дом"), max_length=255)
@@ -23,11 +29,20 @@ class Address(models.Model):
     comment         = models.CharField(("Комментарий"),max_length=255, blank=True, null=True)
     created_at      = models.DateTimeField(("Дата создания"), auto_now_add=True)
 
-    class Meta: 
+    class Meta:
         verbose_name_plural = "Адрес"
 
 
 class Order(models.Model):
+    """
+    The model class that represents an order
+
+    Args:
+        models ([class]): [description]
+
+    Returns:
+        [string]: [the string of user and date of creation]
+    """
 
     PAYMENT_CHOICES = (
         (u'H', u'Наличными курьеру'),

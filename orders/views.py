@@ -21,6 +21,18 @@ from .serializers import *
 
 
 class OrderView(APIView):
+    """
+    Class Based View that making actions like adding and parsing existing orders by user token
+
+    Args:
+        APIView ([class]): [class from rest framework views]
+
+    Raises:
+        serializers.ValidationError: [the error that appears when theres's no way to get a user and get a cart of ther user]
+
+    Returns:
+        [json object]: [ json object of order model]
+    """
 
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -85,12 +97,27 @@ class OrderView(APIView):
 
 
 class OrderSingleView(RetrieveAPIView):
+    """
+    Class Based View to represent a single order by passing primary key of the order to url .../orders/<int:pk>
+
+    Args:
+        RetrieveAPIView ([class]): [class from rest framework for get a single model object]
+    """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class AddressView(APIView):
+    """
+    The Class Based View that handles actions like add addresses and GET existed addresses of the user using user token
+
+    Args:
+        APIView ([class]): [class from rest framework]
+
+    Returns:
+        [json object]: [json object of model address]
+    """
 
     serializer_class = AddressSerializer
     qyeryset = Order.objects.all()
@@ -155,6 +182,15 @@ class AddressView(APIView):
 
 
 class UserProfileView(APIView):
+    """
+    Class Base View to represent a user information like orders, addresses, phone etc.
+
+    Args:
+        APIView ([class]): [class from rest framework]
+
+    Returns:
+        [json object]: [json object of user model]
+    """
 
     serializer_class = UserProfileSerializer
     permission_classes = (IsAuthenticated,)
