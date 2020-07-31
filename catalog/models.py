@@ -13,7 +13,7 @@ from orders.models import Order
 class Category(models.Model):
     # Model representing a dish category
     name    = models.CharField(("Название категории"),max_length=200, help_text='Введите категорию блюда(например, супы, салаты, пицца и т.д.')
-    image   = models.ImageField(("Картинка блюда"),upload_to="category_imgs", default = 'not_found.jpg')
+    # image   = models.ImageField(("Картинка блюда"),upload_to="category_imgs", default = 'not_found.jpg')
 
     def __str__(self):
         # String for representing the Model object.

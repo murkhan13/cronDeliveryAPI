@@ -19,7 +19,6 @@ from rest_framework.status import HTTP_200_OK
 from django.shortcuts import get_object_or_404
 
 import json
-from django_filters import rest_framework as rest_filters, NumberFilter, CharFilter
 from rest_framework import filters
 
 

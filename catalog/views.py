@@ -102,7 +102,7 @@ class GlobalSearchView(APIView):
                     ).filter(name__in=category_names), to_attr='filtered_categories')
                 ).filter(categories__name__in = category_names)
 
-                serializer = RestaurantMenuSerializer(queryset, many=True, context={'request': request})
+                serializer = GlobalSearchSerializer(queryset, many=True, context={'request': request})
 
                 return Response(serializer.data)
             else:
@@ -152,7 +152,7 @@ class RestaurantMenuView(APIView):
     serializer_class = RestaurantMenuSerializer
 
     def get(self, request, *args, **kwargs):
-        # if 'search' in self.request.GET:
+        # if 'name' in self.request.GET:
         name = self.request.GET['name']
 
         menu = RestaurantMenu.objects.filter(restaurant__title=name)

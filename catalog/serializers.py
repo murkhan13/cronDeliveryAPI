@@ -9,54 +9,52 @@ from .models import *
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 
-    class Meta: 
-        model = User 
+    class Meta:
+        model = User
         fields = '__all__'
 
 
 class DishSerializer(serializers.ModelSerializer):
-    class Meta: 
+    class Meta:
         model = Dish
         fields = (
-            'id', 
-            'title', 
+            'id',
+            'title',
             'price',
-            'image', 
-            'description', 
+            'image',
+            'description',
             'portionWeight',
-            'category', 
+            'category',
         )
 
 
 class DishAdditivesSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = DishAdditive
         fields = ('id', 'name', 'addPrice', 'active')
 
 
 class DishExtrasSerializer(serializers.ModelSerializer):
-    
-    class Meta: 
+
+    class Meta:
         model = DishExtra
         fields = ('id', 'name', 'price', 'active')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    
-    class Meta: 
-        model = User 
+
+    class Meta:
+        model = User
         fields = (
-            'id', 
-            'phone', 
+            'id',
+            'phone',
             'name'
         )
 
 
-
-
 class CategoriesSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Category
         fields = ('id','name',)
@@ -66,8 +64,8 @@ class DishDetailSerializer(serializers.ModelSerializer):
     category = CategoriesSerializer(many=True, read_only=True)
     additives = DishAdditivesSerializer(many=True, read_only=True)
     extra = DishExtrasSerializer(many=True, read_only=True)
-    
-    class Meta: 
+
+    class Meta:
         model = Dish
         fields =  ('id', 'title', 'image', 'price',  'portionWeight','description', 'category', 'additives', 'extra')
 
@@ -76,16 +74,16 @@ class DishDetailSerializer(serializers.ModelSerializer):
 
 
 class CategoryItemsSerializer(serializers.ModelSerializer):
-    
+
     dishes = DishDetailSerializer(many=True, read_only = True)
-    
+
     class Meta:
         model = Category
-        fields =  ['id', 'name','image', 'dishes']
+        fields =  ['id', 'name', 'dishes']
 
 
 class CategoryItemsSearchSerializer(serializers.ModelSerializer):
-    
+
     dishes = DishDetailSerializer(source='filtered_dishes', many=True, read_only=True)
 
     class Meta:
@@ -94,20 +92,20 @@ class CategoryItemsSearchSerializer(serializers.ModelSerializer):
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
-    
-    class Meta: 
+
+    class Meta:
         model = Restaurant
-        fields = ( 
+        fields = (
             'id',
-            'title', 
-            'logo', 
+            'title',
+            'logo',
             'image',
-            'workTime', 
-            'minOrder', 
-            'freeOrder', 
-            'address', 
-            'delivery', 
-            'maxDeliverDist', 
+            'workTime',
+            'minOrder',
+            'freeOrder',
+            'address',
+            'delivery',
+            'maxDeliverDist',
             'info'
         )
 
@@ -133,17 +131,31 @@ class RestaurantMenuSerializer(serializers.ModelSerializer):
 
 class RestaurantMenuSerializer(serializers.ModelSerializer):
     # categories = CategoryItemsSerializer(source='filtered_categories', many=True, read_only=True)
-    
+
+    categories = CategoryItemsSerializer(many=True, read_only=True)
+    restaurant = RestaurantDetailSerializer(read_only=True)
+
+    class Meta:
+        model = RestaurantMenu
+        fields = (
+            'categories',
+            'restaurant'
+        )
+
+
+class GlobalSearchSerializer(serializers.ModelSerializer):
+    # categories = CategoryItemsSerializer(source='filtered_categories', many=True, read_only=True)
+
     categories = CategoryItemsSearchSerializer(source='filtered_categories', many=True, read_only=True)
     restaurant = RestaurantDetailSerializer(read_only=True)
 
     class Meta:
         model = RestaurantMenu
         fields = (
-            'categories', 
+            'categories',
             'restaurant'
-        ) 
-        
+        )
+
 
 class UserFavoriteRestaurants(serializers.ModelSerializer):
 
@@ -174,38 +186,38 @@ class CartDishSerializer(serializers.ModelSerializer):
     category    = CategoriesSerializer(many=True, read_only=True)
     additives   = DishAdditivesSerializer(many=True,read_only=True)
     extra       = DishExtrasSerializer(many=True,read_only=True)
-    
+
     class Meta:
         model = CartItem
         fields = (
-            'id', 
+            'id',
             'dish_id',
-            'title', 
+            'title',
             'price',
-            'image', 
+            'image',
             'description',
             'portionWeight',
             'category',
-            'additives', 
-            'extra', 
+            'additives',
+            'extra',
         )
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    
+
     dishDetail = serializers.SerializerMethodField('get_dish_details')
-    
+
     class Meta:
         model = CartItem
         fields = (
-            'dishDetail', 
+            'dishDetail',
             'quantity'
         )
 
     def get_dish_details(self, obj):
-        
+
         cartitem = CartItem.objects.filter(id=obj.id)
-        
+
         return CartDishSerializer(cartitem, many=True).data
 
     '''def to_representation(self, instance):
@@ -223,11 +235,11 @@ class CartItemSerializer(serializers.ModelSerializer):
             },
             'quantity': instance.quantity
         }'''
-    
+
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True,read_only=True)
 
     class Meta:
         model = Cart
-        fields = ('id', 'user', 'items')        
+        fields = ('id', 'user', 'items')
