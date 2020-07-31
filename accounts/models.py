@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Пользователь должен иметь номер телефона')
         """if not password:
             raise ValueError('Пользователь должен иметь пароль')
-        
+
         password=None, """
 
         user_obj = self.model(
@@ -32,7 +32,7 @@ class UserManager(BaseUserManager):
         user_obj.active = is_active
         user_obj.save(using=self._db)
         return user_obj
-    
+
     def create_staffuser(self, phone, password=None, is_admin=False, is_staff=True, is_active=True):
 
         user_obj = self.model(
@@ -46,12 +46,12 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
         user = self.create_user(
-            phone, 
+            phone,
             password=password,
             is_staff=True,
         )
         return user
-    
+
     def create_superuser(self, phone, password, is_active=True, is_staff=True, is_admin=True):
 
         if not phone :
@@ -76,12 +76,22 @@ class UserManager(BaseUserManager):
         #     password=password,
         #     is_staff=True,
         #     is_admin=True
-        # )   
+        # )
         # user.save(using=self._db)
         # return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """
+    Model class that represents a user, with some rules that set in UserManager class
+
+    Args:
+        AbstractBaseUser ([class]): [class from django]
+        PermissionsMixin ([class]): [class mixin from django]
+
+    Returns:
+        [type]: [description]
+    """
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,30}$',#regex=r'^\+?1?\d{9,15}$'regex=r'^\+?1?\d{11,25}$',
                                 message="Phone number must be entered in the format: '+999999999'. Up to 14 digits allowed.")
     phone       = models.CharField(validators = [phone_regex], max_length=25, unique=True)
@@ -103,35 +113,44 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_full_name(self):
         if self.name:
             return self.name
-        else: 
+        else:
             return self.phone
-    
+
     def get_short_name(self):
         return self.phone
-    
+
     def has_perm(self, perm, obj=None):
         return True
 
     def has_module_perms(self, app_label):
         return True
-    
-    @property 
+
+    @property
     def is_staff(self):
         return self.staff
-    
+
     @property
     def is_admin(self):
         return self.admin
-    
+
     @property
     def is_active(self):
         return self.active
-    
+
     class Meta:
         verbose_name_plural = "Пользователи"
-    
+
 
 class PhoneOTP(models.Model):
+    """
+    Model class that represents a otp that generate and send to the user while authorizing
+
+    Args:
+        models ([class]): [model class from django]
+
+    Returns:
+        [string]: [information of object to django admin panel]
+    """
     phone_regex = RegexValidator(regex=r'^\+?1?\d{11,25}$',
                                 message="Phone number must be entered in the format: '+999999999'. Up to 14 digits allowed.")
     phone               = models.CharField(validators = [phone_regex], max_length=25, unique=True)
@@ -139,7 +158,6 @@ class PhoneOTP(models.Model):
     count               = models.IntegerField(default = 0, help_text = 'Number of otp sent')
     validated           = models.BooleanField(default = False, help_text='If it is true, that means user have validate otp correctly in second API')
     favoriteRestaurants = models
-    
+
     def __str__(self):
         return str(self.phone) + ' is sent ' + str(self.otp)
-

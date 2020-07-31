@@ -89,7 +89,15 @@ class DishExtra(models.Model):
 
 
 class Restaurant(models.Model):
+    """
+    Model class that represent a restaurant model 
 
+    Args:
+        models ([class]): [model class]
+
+    Returns:
+        [string]: [the title of restaurant and an image image.url]
+    """
     title           = models.CharField(("Название ресторана"),max_length = 200)
     logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
     image           = models.ImageField(("Картинка ресторана"),upload_to="restaurant", default = 'not_found.jpg')
@@ -100,6 +108,7 @@ class Restaurant(models.Model):
     delivery        = models.IntegerField(("Стоимость доставки"))
     maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки(km)"), default=20)
     info            = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
+
     # categories      = models.ManyToManyField(Category)
     # categories = models.(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
     latitude        = models.FloatField(("Широта"), blank=True, null=True)
@@ -144,6 +153,12 @@ class Offer(models.Model):
 
 
 class Cart(models.Model):
+    """
+    Model class that represents a cart
+
+    Args:
+        models ([class]): [model class from django]
+    """
     user = models.ForeignKey(
         User,
         related_name="cart",
@@ -156,6 +171,15 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
+    """
+    Model class that represents a cart item
+
+    Args:
+        models ([class]): [model class from django]
+
+    Returns:
+        [string]: [returns a strings of information about object]
+    """
     cart = models.ForeignKey(
         Cart,
         on_delete=models.CASCADE,
@@ -186,6 +210,7 @@ class CartItem(models.Model):
 
     def __str__(self):
         return self.title
+
     @property
     def get_absolute_image_url(self):
         return "{0}{1}".format(settings.MEDIA_URL, self.image.url)
@@ -193,5 +218,4 @@ class CartItem(models.Model):
     def __unicode__(self):
         return '%s: %s' %(self.title, self.quantity)
     class Meta:
-
         ordering = ['-created_at']

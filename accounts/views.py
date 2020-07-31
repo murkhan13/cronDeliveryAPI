@@ -18,7 +18,7 @@ import random
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
 
-import requests
+import requestsdescription
 
 def send_sms(phone, key):
     print(phone)
@@ -40,11 +40,19 @@ def send_otp(phone):
 
 
 class ValidatePhoneSendOTP(APIView):
+    """
+    Class Based View that handles an otp validation and send it to user by sms
+
+    Args:
+        APIView ([class]): [class from rest framework]
+
+    Returns:
+        [class]: [the state messages]
+    """
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         phone = request.data.get('phone')
-        
 
         if phone:
             phone = str(phone)
@@ -84,7 +92,7 @@ class ValidatePhoneSendOTP(APIView):
                         "detail": "Номер телефона получен, введите код подтверждения",
                         'key': key,
                         'user_exists': user_exists
-                    }) 
+                    })
             else:
                 return Response({
                     'status': False,
@@ -98,6 +106,15 @@ class ValidatePhoneSendOTP(APIView):
 
 
 class ValidateOtpAndAuthenticate(KnoxLoginView):
+    """
+    Class Base View that handles authorizing and giving a token to user by matching the otp generated and sent to user by sms
+
+    Args:
+        KnoxLoginView ([class]): [class base view from know auth library]
+
+    Returns:
+        [class]: [error messages of user model with token]
+    """
     permission_classes = (AllowAny,)
 
     def post(self, request, format = None):
@@ -125,18 +142,17 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             login(request,user)
                             old.delete()
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
-                            
-                    else: 
+                    else:
                         old.delete()
                         return Response({
                             'status': False,
                             'detail': 'Код подтверждения неверный, повторите попытку'
-                        }) 
-                else: 
+                        })
+                else:
                     return Response({
                         'status': False,
                         'detail': 'Ошибка запроса, сначала отправьте номер телефона'
-                    }) 
+                    })
             else:
                 old = PhoneOTP.objects.filter(phone__iexact=phone)
                 if old.exists():
@@ -164,39 +180,29 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             login(request,user)
 
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
-                    else: 
+                    else:
                         old.delete()
                         return Response({
                             'status': False,
                             'detail': 'Код подтверждения неверный, повторите попытку'
-                        })     
-                else: 
+                        })
+                else:
                     return Response({
                         'status': False,
                         'detail': 'Ошибка запроса, сначала отправьте номер телефона'
                     })
 
-class SetUserName(APIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
-
-    def post(self,request):
-        user_name = request.data.get('name', False)
-        if user_name:
-            user = self.request.user
-            user.name = user_name
-            user.save()
-            return Response({
-                'status': True,
-                'detail': 'Имя пользователя получено'
-            })
-        else:
-            return Response({
-                'status': False,
-                'detail': 'Имя не отправлено!!!'
-            })
 
 class SetUserName(APIView):
+    """
+    Class Base View that handles setting the name of user
+
+    Args:
+        APIView ([class]): [class from rest framework]
+
+    Returns:
+        [json]: [response message]
+    """
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -238,18 +244,18 @@ class ChangePhone(APIView):
                     return Response({
                         "status": True,
                         "detail": "Номер телефона изменён"
-                    })         
-                else: 
+                    })
+                else:
                     old.delete()
                     return Response({
                         'status': False,
                         'detail': 'Код подтверждения неверный, повторите попытку'
-                    }) 
-            else: 
+                    })
+            else:
                 return Response({
                     'status': False,
                     'detail': 'Ошибка запроса, сначала отправьте номер телефона'
-                }) 
+                })
         else:
             return Response({
                 'status': False,
@@ -257,12 +263,21 @@ class ChangePhone(APIView):
             })
 
 class LogoutView(APIView):
+    """
+    Class Based View that handles the deleting of user token when he's logging out
+
+    Args:
+        APIView ([class]): [class from rest framework]
+
+    Returns:
+        [json]: [response message]
+    """
 
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
 
     def post(self, request):
-        
+
         request._auth.delete()
         return Response({
                 "success": True
