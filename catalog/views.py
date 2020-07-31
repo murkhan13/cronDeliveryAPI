@@ -159,7 +159,7 @@ class RestaurantMenuView(APIView):
 
         serializer = RestaurantMenuSerializer(menu, many=True, context={'request': request})
 
-        return Response(serializer.data)
+        return Response(serializer.data[0])
 
 
 class MenuPageView(ListModelMixin, GenericAPIView):
