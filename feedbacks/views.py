@@ -17,18 +17,40 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAu
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from django.shortcuts import get_object_or_404
+from catalog.models import Restaurant
+from orders.models import Order
 
 import json
 from rest_framework import filters
 
 
 
-class FeedbacksView(APIView):
+class RestauranFeedbacksView(APIView):
     """
-    A class for representing and adding feedbacks
+    A class for representing and adding feedbacks to restaurant
 
     Args:
         APIView ([class]): [class from rest_framework]
     """
 
-    def get(self, request, )
+    def get(self, request, *args, **kwargs):
+        feedbacks_qs = RestaurantFeedback.objects.filter(restaurant=Restaurant.objects.filter(title=request.data['restaurant'])
+
+
+    def post(self, request):
+        try:
+            point   = request.data['point']
+            pros    = request.data['pros']
+            cons    = request.data['cons']
+        except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при добавлении отзыва"
+            }
+        feedback = RestaurantFeedback.objects.create(
+            name=self.request.user.name,
+            overallPoint=point,
+            pros=pros,
+            cons=cons
+        )
+

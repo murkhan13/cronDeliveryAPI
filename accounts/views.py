@@ -18,7 +18,7 @@ import random
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
 
-import requestsdescription
+import requests
 
 def send_sms(phone, key):
     print(phone)

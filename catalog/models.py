@@ -101,13 +101,19 @@ class Restaurant(models.Model):
     title           = models.CharField(("Название ресторана"),max_length = 200)
     logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
     image           = models.ImageField(("Картинка ресторана"),upload_to="restaurant", default = 'not_found.jpg')
-    workTime        = models.CharField(("График работы"),max_length = 200, help_text='укажите ') 
+    workTime        = models.CharField(("График работы"),max_length = 200, help_text='укажите ')
     minOrder        = models.IntegerField(("Минимальный заказ"),help_text='Минимальный заказ')
     freeOrder       = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
     address         = models.CharField(("Адрес ресторана"),max_length = 200)
     delivery        = models.IntegerField(("Стоимость доставки"))
     maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки(km)"), default=20)
     info            = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
+    # sumOfPoints sums everytime user give a feedback with point
+    # and in the view the given sum is dividing by feedBacksAmount integer field
+    # that also increasing everytime user gives a feedback
+    feedbacksAmount = models.IntegerField(default=0)
+    sumOfPoints     = models.IntegerField(default=0)
+    rating          = models.FloatField(("Рейтинг"),blank=True, null=True)
 
     # categories      = models.ManyToManyField(Category)
     # categories = models.(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)

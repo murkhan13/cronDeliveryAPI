@@ -5,12 +5,13 @@ from accounts.models import User
 from .models import *
 
 
-class FeedbackSerializer(serializers.ModelSerializer):
+class RestaurantFeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Feedback
+        model = RestaurantFeedback
         fields = (
+            'name',
             'overalRate',
-            'pros', 
+            'pros',
             'cons'
         )
