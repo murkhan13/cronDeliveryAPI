@@ -153,7 +153,7 @@ class RestaurantMenuView(APIView):
 
     def get(self, request, *args, **kwargs):
         # if 'name' in self.request.GET:
-        name = self.request.GET['name']
+        name = self.request.GET['title']
 
         menu = RestaurantMenu.objects.filter(restaurant__title=name)
 
