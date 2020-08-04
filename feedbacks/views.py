@@ -25,7 +25,10 @@ from rest_framework import filters
 
 
 
-class RestauranFeedbacksView(APIView):
+class RestaurantFeedbacksView(APIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    authentication_classes = (TokenAuthentication,)
+
     """
     A class for representing and adding feedbacks to restaurant
 
@@ -34,23 +37,66 @@ class RestauranFeedbacksView(APIView):
     """
 
     def get(self, request, *args, **kwargs):
-        feedbacks_qs = RestaurantFeedback.objects.filter(restaurant=Restaurant.objects.filter(title=request.data['restaurant'])
+        restaurant = Restaurant.objects.get(title=self.request.GET['restaurant'])
+        feedbacks_qs = RestaurantFeedback.objects.filter(restaurant=restaurant)
 
+        serializer = RestaurantFeedbackSerializer(feedbacks_qs, many=True, context = {"request": request})
+        return Response(serializer.data)
 
     def post(self, request):
         try:
-            point   = request.data['point']
-            pros    = request.data['pros']
-            cons    = request.data['cons']
+            restaurant  = Restaurant.objects.get(title=request.data['restaurant'])
+            point       = int(request.data['point'])
+            pros        = request.data['pros']
+            cons        = request.data['cons']
         except:
             return Response({
                 "status": False,
                 "detail": "Ошибка при добавлении отзыва"
-            }
-        feedback = RestaurantFeedback.objects.create(
-            name=self.request.user.name,
-            overallPoint=point,
-            pros=pros,
-            cons=cons
-        )
+            })
 
+        feedback = RestaurantFeedback.objects.create(
+        user=self.request.user,
+        restaurant=restaurant,
+        name=self.request.user.name,
+        overallPoint=point,
+        pros=pros,
+        cons=cons
+        )
+        feedback.save()
+        restaurant.feedbacksAmount += 1
+        restaurant.sumOfPoints += point
+        restaurant.save()
+        if restaurant.feedbacksAmount > 0:
+            restaurant.rating = restaurant.sumOfPoints / restaurant.feedbacksAmount
+            restaurant.save()
+        print(self.request.user.name)
+        return Response({
+            "status": True,
+            "detail": "Отзыв успешно добавлен"
+        })
+        """except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при добавлении отзыва"
+            })"""
+
+    def delete(self, request):
+        try:
+            feedback_qs = RestaurantFeedback.objects.filter(pk=request.data['feedback'])
+            if feedback_qs.exists():
+                feedback_qs.delete()
+                return Response({
+                    "status": True,
+                    "detail": "Отзыв удалён"
+                    })
+            else:
+                return Response({
+                    "status": False,
+                    "detail": "Отзыв не найден"
+                })
+        except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при удалении отзыва"
+            })

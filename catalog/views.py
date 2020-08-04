@@ -78,6 +78,15 @@ class SearchInRestaurantView(ListAPIView):
 
 
 class GlobalSearchView(APIView):
+    """
+    Class Based View that handles a searching through all restaurants logic
+
+    Args:
+        APIView ([class]): [view class from rest framework]
+
+    Returns:
+        [json object]: [json object of searched queryset]
+    """
     permission_classes = [AllowAny, ]
 
     def get(self, request, *args, **kwargs):
@@ -459,7 +468,6 @@ class CartItemDeleteView(APIView):
                 "status": True
             })
         except:
-
             return Response({
                 "status": False
             })
@@ -482,6 +490,12 @@ class CartDeleteView(APIView):
             })
 
 class FavoriteRestaurantsView(APIView):
+    """
+    Class Based View that handles to add restaurant to liked by user
+
+    Args:
+        APIView ([class]): [view class from rest framework]
+    """
     serializer_class = CartSerializer
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
@@ -498,13 +512,12 @@ class FavoriteRestaurantsView(APIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-
         try:
             restaurant_title = request.data.get('restaurant_title')
         except:
             return Response({
                 'status': False,
-                'detail': 'Ошибка добавления ресторана.'
+                'detail': 'Ошибка добавления ресторана в список любимых'
             })
 
         # user_liked = User.objects.get(pk=self.request.user.id)
@@ -513,6 +526,22 @@ class FavoriteRestaurantsView(APIView):
 
         return Response({
             "status": True,
-            "detail": "Ресторан добавлен"
+            "detail": "Ресторан добавлен в список любимых"
         })
 
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            restaurant_title = request.data.get('restaurant_title')
+        except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при удалении ресторана из списка любимых."
+            })
+        restaurant = Restaurant.objects.get(title=restaurant_title)
+        restaurant.likedUser.remove()
+
+        return Response({
+            "status": True,
+            "detail": "Ресторан удалён из списка любимых"
+        })

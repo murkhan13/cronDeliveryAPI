@@ -15,10 +15,10 @@ class RegisterForm(forms.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput)
     password2 = forms.CharField(label='Подтвердите пароль', widget=forms.PasswordInput)
 
-    class Meta: 
+    class Meta:
         model = User
         fields = ('phone', )
-    
+
     def clean_phone(self):
         phone = self.cleaned_data('phone')
         qs = User.objects.filter(phone=phone)
@@ -42,7 +42,6 @@ class SetPasswordForm(forms.Form):
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput)
     password2 = forms.CharField(
         label="Подтверждение пароля", widget=forms.PasswordInput)
-    
 
 class UserAdminCreationForm(forms.ModelForm):
     # Form for creating new users. Include all the required
@@ -61,7 +60,7 @@ class UserAdminCreationForm(forms.ModelForm):
             if password1 and password2 and password1 != password2:
                 raise forms.ValidationError('Пароли не совпадают')
             return password2
-        
+
         def save(self, commit=True):
             # Save the provided password in a hashed format
             user = super(UserAdminCreationForm, self).save(commit=False)

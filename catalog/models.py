@@ -90,7 +90,7 @@ class DishExtra(models.Model):
 
 class Restaurant(models.Model):
     """
-    Model class that represent a restaurant model 
+    Model class that represent a restaurant model
 
     Args:
         models ([class]): [model class]
@@ -99,6 +99,7 @@ class Restaurant(models.Model):
         [string]: [the title of restaurant and an image image.url]
     """
     title           = models.CharField(("Название ресторана"),max_length = 200)
+    rating          = models.FloatField(("Рейтинг"),blank=True, null=True)
     logo            = models.ImageField(("Логотип Ресторана"),upload_to="logos", default = 'not_found.jpg')
     image           = models.ImageField(("Картинка ресторана"),upload_to="restaurant", default = 'not_found.jpg')
     workTime        = models.CharField(("График работы"),max_length = 200, help_text='укажите ')
@@ -113,7 +114,7 @@ class Restaurant(models.Model):
     # that also increasing everytime user gives a feedback
     feedbacksAmount = models.IntegerField(default=0)
     sumOfPoints     = models.IntegerField(default=0)
-    rating          = models.FloatField(("Рейтинг"),blank=True, null=True)
+
 
     # categories      = models.ManyToManyField(Category)
     # categories = models.(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)

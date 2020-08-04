@@ -107,6 +107,8 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
             'delivery',
             'maxDeliverDist',
             'info'
+            'feedbacksAmount',
+            'rating'
         )
 
 
