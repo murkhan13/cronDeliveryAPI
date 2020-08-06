@@ -353,7 +353,7 @@ class CartItemAddView(APIView):
                         flag = True
 
                 if flag == True:
-                    existing_cart_item.quantity += quantity
+                    existing_cart_item.quantity = quantity
                     existing_cart_item.save()
                     return Response({
                         "status": True
