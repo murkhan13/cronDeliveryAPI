@@ -197,8 +197,8 @@ class MenuPageView(ListModelMixin, GenericAPIView):
 
 
 class CartItemAddView(APIView):
-    serializer_class = CartSerializer
-    permission_classes = (IsAuthenticated,)
+    serializer_class = CartItemSerializer
+    permission_classes = (AllowAny,)
     authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
@@ -206,28 +206,43 @@ class CartItemAddView(APIView):
 
 
     def get(self, request):
-
-        try:
-            cart = Cart.objects.get(user=self.request.user)
-        except:
-            cart = Cart.objects.create(user=self.request.user)
-            cart.save()
+        # if user logged in get cart of authorized customer else get cart of unauthorized customer
+        if self.request.user:
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+            except:
+                cart = Cart.objects.create(user=self.request.user)
+                cart.save()
+        else:
+            try:
+                cart = Cart.objects.get(device_token=request.data['device_token'])
+            except:
+                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart.save()
         context = {
             "request": request,
         }
-        user_cart = Cart.objects.get(user=self.request.user)
-        cartitems = CartItem.objects.filter(cart=user_cart)
+        # user_cart = Cart.objects.get(user=self.request.user)
+        cartitems = CartItem.objects.filter(cart=cart)
         serializer = CartItemSerializer(cartitems, many=True, context=context)
         return Response(serializer.data)
 
 
     def post(self, request, pk=None):
+        # if user logged in get cart of authorized customer else get cart of unauthorized customer
+        if self.request.user:
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+            except:
+                cart = Cart.objects.create(user=self.request.user)
+                cart.save()
+        else:
+            try:
+                cart = Cart.objects.get(device_token=request.data['device_token'])
+            except:
+                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart.save()
 
-        try:
-            cart = Cart.objects.get(user=self.request.user)
-        except:
-            cart = Cart.objects.create(id=self.request.user.id,user=self.request.user)
-            cart.save()
         try:
             dish = Dish.objects.get(
                 pk=request.data['dish_id']

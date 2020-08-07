@@ -170,8 +170,12 @@ class Cart(models.Model):
         User,
         related_name="cart",
         on_delete=models.CASCADE,
-        default=None
+        default=None,
+        blank=True,
+        null=True
         )
+    device_token = models.CharField(max_length=256, null=True, blank=True)
+
 
     class Meta:
         verbose_name_plural = "Корзина"

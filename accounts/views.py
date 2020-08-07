@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 from .models import User, PhoneOTP
+from catalog.models import Cart
 from .serializers import CreateUserSerializer, UserSerializer, LoginSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -120,6 +121,7 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
     def post(self, request, format = None):
         phone = request.data.get('phone', False)
         otp_sent = request.data.get('otp', False)
+        device_token = request.data.get('device_token', False)
         # name = request.data.get('name', False)
 
         if phone and otp_sent:
@@ -138,7 +140,9 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             serializer = LoginSerializer(data = request.data)
                             serializer.is_valid(raise_exception=True)
                             user = serializer.validated_data['user']
-
+                            cart = Cart.objects.filter(device_token=device_token)
+                            if cart.exists():
+                                cart.user=user
                             login(request,user)
                             old.delete()
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
@@ -170,6 +174,9 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             }
                             user = User.objects.create(phone=phone)
                             user.save()
+                            cart = Cart.objects.filter(device_token=device_token)
+                            if cart.exists():
+                                cart.user = user
                             # serializer = CreateUserSerializer(data=temp_data)
                             # serializer.is_valid(raise_exception=True)
                             # user = serializer.save()
