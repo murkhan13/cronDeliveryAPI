@@ -238,9 +238,9 @@ class CartItemAddView(APIView):
                 cart.save()
         else:
             try:
-               cart = Cart.objects.get(device_token=self.request.GET['device_token'])
+               cart = Cart.objects.get(device_token=request.data['device_token'])
             except:
-                cart = Cart.objects.create(device_token=self.request.GET['device_token'])
+                cart = Cart.objects.create(device_token=request.data['device_token'])
                 cart.save()
         context = {
             "request": request,
