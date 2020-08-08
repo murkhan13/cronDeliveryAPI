@@ -62,11 +62,16 @@ class OrderView(APIView):
             deliverTo = request.data['deliverTo']
         else:
             deliverTo = 'Как можно быстрее'
+        if 'restaurant' in request.data:
+            restaurant = request.data['restaurant']
+        else:
+            restaurant = None
         order = Order(
             user=purchaser,
             phone=request.data['phone'],
             total=request.data['total'],
             deliverTo=deliverTo,
+            restaurant=restaurant,
             address = request.data['address'],
             comment = request.data['comment'],
             personsAmount=request.data['personsAmount'],

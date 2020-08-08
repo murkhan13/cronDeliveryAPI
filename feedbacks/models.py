@@ -42,7 +42,6 @@ class OrderFeedback(models.Model):
         blank=True,
         null=True
     )
-
     name            = models.CharField(('Имя'), max_length=200)
     overallPoint    = models.IntegerField(verbose_name="Оценка заказа")
     pros            = models.CharField(max_length=255, verbose_name='Плюсы', default='нет')

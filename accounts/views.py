@@ -58,8 +58,6 @@ class ValidatePhoneSendOTP(APIView):
         if phone:
             phone = str(phone)
             user = User.objects.filter(phone__iexact=phone)
-            print(phone)
-            print(phone)
 
             if user.exists():
                 user_exists = True
@@ -140,9 +138,14 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             serializer = LoginSerializer(data = request.data)
                             serializer.is_valid(raise_exception=True)
                             user = serializer.validated_data['user']
-                            cart = Cart.objects.filter(device_token=device_token)
-                            if cart.exists():
-                                cart.user=user
+                            if device_token != False:
+                                try:
+                                    cart = Cart.objects.get(device_token=device_token)
+                                    if cart is not None:
+                                        cart.user=user
+                                        cart.save()
+                                except:
+                                    pass
                             login(request,user)
                             old.delete()
                             return super(ValidateOtpAndAuthenticate, self).post(request, format=None)
@@ -162,7 +165,6 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                 if old.exists():
                     old = old.first()
                     otp = old.otp
-                    print(old.otp, otp)
                     if str(otp_sent) == str(otp):
                         old.validated = True
                         old.save()
@@ -174,9 +176,14 @@ class ValidateOtpAndAuthenticate(KnoxLoginView):
                             }
                             user = User.objects.create(phone=phone)
                             user.save()
-                            cart = Cart.objects.filter(device_token=device_token)
-                            if cart.exists():
-                                cart.user = user
+                            if device_token != False:
+                                try:
+                                    cart = Cart.objects.get(device_token=device_token)
+                                    if cart is not None:
+                                        cart.user = user
+                                        cart.save
+                                except:
+                                    pass
                             # serializer = CreateUserSerializer(data=temp_data)
                             # serializer.is_valid(raise_exception=True)
                             # user = serializer.save()

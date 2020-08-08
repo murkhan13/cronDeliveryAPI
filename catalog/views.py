@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.views import APIView
-from django.db.models import Prefetch
-from rest_framework.mixins import ListModelMixin 
+from rest_framework.mixins import ListModelMixin
 from .serializers import *
 from .models import *
 from django.shortcuts import get_object_or_404
 from itertools import chain
 from django.db.models import Prefetch, Q, FilteredRelation
-from cronProjectAPI.settings import ALLOWED_HOSTS 
+from cronProjectAPI.settings import ALLOWED_HOSTS
+from django.contrib.auth.models import AnonymousUser
 
 from knox.auth import TokenAuthentication
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
@@ -201,13 +201,13 @@ class CartItemAddView(APIView):
     permission_classes = (AllowAny,)
     authentication_classes = (TokenAuthentication,)
 
-    def get_queryset(self):
-        return Cart.objects.filter(user=self.request.user)
 
 
     def get(self, request):
         # if user logged in get cart of authorized customer else get cart of unauthorized customer
-        if self.request.user:
+        # Cart.objects.all().delete()
+        # CartItem.objects.all().delete()
+        if request.user.is_authenticated:
             try:
                 cart = Cart.objects.get(user=self.request.user)
             except:
@@ -215,14 +215,13 @@ class CartItemAddView(APIView):
                 cart.save()
         else:
             try:
-                cart = Cart.objects.get(device_token=request.data['device_token'])
+               cart = Cart.objects.get(device_token=self.request.GET['device_token'])
             except:
-                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart = Cart.objects.create(device_token=self.request.GET['device_token'])
                 cart.save()
         context = {
             "request": request,
         }
-        # user_cart = Cart.objects.get(user=self.request.user)
         cartitems = CartItem.objects.filter(cart=cart)
         serializer = CartItemSerializer(cartitems, many=True, context=context)
         return Response(serializer.data)
@@ -230,7 +229,8 @@ class CartItemAddView(APIView):
 
     def post(self, request, pk=None):
         # if user logged in get cart of authorized customer else get cart of unauthorized customer
-        if self.request.user:
+        if request.user.is_authenticated:
+            print(len(Cart.objects.filter(user=self.request.user)))
             try:
                 cart = Cart.objects.get(user=self.request.user)
             except:
@@ -238,11 +238,13 @@ class CartItemAddView(APIView):
                 cart.save()
         else:
             try:
-                cart = Cart.objects.get(device_token=request.data['device_token'])
+               cart = Cart.objects.get(device_token=self.request.GET['device_token'])
             except:
-                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart = Cart.objects.create(device_token=self.request.GET['device_token'])
                 cart.save()
-
+        context = {
+            "request": request,
+        }
         try:
             dish = Dish.objects.get(
                 pk=request.data['dish_id']
@@ -269,7 +271,6 @@ class CartItemAddView(APIView):
             extra_list = [int(n) for n in extras_string.split(',')]
         else:
             extra_list = None
-
 
         existing_cart_items = CartItem.objects.filter(cart=cart.id, title=dish.title)
 
@@ -415,7 +416,7 @@ class CartItemEditView(APIView):
 
         try:
             cartitem = CartItem.objects.get(
-                pk=request.data['cartitem_id']
+                pk=request.data['cartitem_id'],
             )
             quantity = int(request.data['quantity'])
         except Exception as e:

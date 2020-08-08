@@ -170,7 +170,6 @@ class Cart(models.Model):
         User,
         related_name="cart",
         on_delete=models.CASCADE,
-        default=None,
         blank=True,
         null=True
         )

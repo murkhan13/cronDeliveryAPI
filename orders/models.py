@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 # from catalog.models import CartItem
 from django.core.validators import RegexValidator
 
-
 User = get_user_model()
 
 
@@ -72,7 +71,7 @@ class Order(models.Model):
     deliverTo       = models.CharField(("Доставить к"), max_length=255)
 
     # order_items     = models.ManyToManyField(CartItem, verbose_name="Заказанные блюда")
-
+    restaurant      = models.CharField(max_length=200, verbose_name="Ресторан", default=None)
     address         = models.CharField(("Адрес"), max_length=255)
 
     comment         = models.CharField(("Комментарий"), max_length=255, null=True, blank=True)
