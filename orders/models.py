@@ -31,7 +31,6 @@ class Address(models.Model):
     class Meta:
         verbose_name_plural = "Адрес"
 
-
 class Order(models.Model):
     """
     The model class that represents an order
@@ -71,7 +70,7 @@ class Order(models.Model):
     deliverTo       = models.CharField(("Доставить к"), max_length=255)
 
     # order_items     = models.ManyToManyField(CartItem, verbose_name="Заказанные блюда")
-    restaurant      = models.CharField(max_length=200, verbose_name="Ресторан", null=True, blank=True)
+    # restaurant      = models.CharField(max_length=200, verbose_name="Ресторан", null=True, blank=True)
     address         = models.CharField(("Адрес"), max_length=255)
 
     comment         = models.CharField(("Комментарий"), max_length=255, null=True, blank=True)
