@@ -84,6 +84,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'orderStatus',
             'paymentMode',
             'order_items',
+            'restaurant',
             'address',
             'comment',
             'deliverTo',
