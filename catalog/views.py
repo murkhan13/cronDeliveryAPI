@@ -481,8 +481,9 @@ class CartItemEditView(APIView):
                 })
         else:
             return Response({
+                "item": cartitem,
                 "status": False,
-                "detail": "Ошибка при удалении"
+                "detail": "Ошибка при изменении"
             })
 
 
