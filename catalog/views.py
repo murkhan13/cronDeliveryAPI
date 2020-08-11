@@ -414,10 +414,24 @@ class CartItemEditView(APIView):
 
     def post(self,request,pk=None):
 
+        if request.user.is_authenticated:
+            print(len(Cart.objects.filter(user=self.request.user)))
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+            except:
+                cart = Cart.objects.create(user=self.request.user)
+                cart.save()
+        else:
+            try:
+               cart = Cart.objects.get(device_token=request.data['device_token'])
+            except:
+                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart.save()
         try:
-            cartitem = CartItem.objects.get(
-                pk=request.data['cartitem_id'],
-            )
+            cartitem = CartItem.objects.filter(
+                pk=request.data['cartitem_id']
+            ).filter(cart=cart).first()
+
             quantity = int(request.data['quantity'])
         except Exception as e:
             print(e)
@@ -441,62 +455,96 @@ class CartItemEditView(APIView):
             extra_list = [int(n) for n in extras_string.split(',')]
         else:
             extra_list = None
-        try:
-            cartitem.quantity = quantity
-            cartitem.save()
 
-            if additives is not None:
-                cartitem.additives.clear()
-                cartitem.additives.add(additives)
+        if cartitem:
+            try:
+                cartitem.quantity = quantity
+                cartitem.save()
 
-            if extra_list is not None:
-                cartitem.extra.clear()
-                for extra in extra_list:
-                    obj = DishExtra.objects.get(pk=extra)
-                    cartitem.extra.add(obj)
-            else:
-                cartitem.extra.clear()
+                if additives is not None:
+                    cartitem.additives.clear()
+                    cartitem.additives.add(additives)
+
+                if extra_list is not None:
+                    cartitem.extra.clear()
+                    for extra in extra_list:
+                        obj = DishExtra.objects.get(pk=extra)
+                        cartitem.extra.add(obj)
+                else:
+                    cartitem.extra.clear()
+                return Response({
+                    "status": True
+                })
+            except:
+                return Response({
+                    "status": False
+                })
+        else:
             return Response({
-                "status": True
-            })
-        except:
-            return Response({
-                "status": False
+                "status": False,
+                "detail": "Ошибка при удалении"
             })
 
 
 class CartItemDeleteView(APIView):
 
     def post(self, request, pk=None):
-
+        if request.user.is_authenticated:
+            print(len(Cart.objects.filter(user=self.request.user)))
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+            except:
+                cart = Cart.objects.create(user=self.request.user)
+                cart.save()
+        else:
+            try:
+               cart = Cart.objects.get(device_token=request.data['device_token'])
+            except:
+                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart.save()
         try:
-            cartitem = CartItem.objects.get(
+            cartitem = CartItem.objects.filter(
                 pk=request.data['cartitem_id']
-            )
+            ).filter(cart=cart)
         except:
             return Response({
                 "status": False,
                 "detail": "Товар по такому id не найден"
             })
-        try:
-            cartitem.delete()
+        if cartitem.exist():
+            try:
+                cartitem.delete()
+                return Response({
+                    "status": True
+                })
+            except:
+                return Response({
+                    "status": False
+                })
+        else:
             return Response({
-                "status": True
-            })
-        except:
-            return Response({
-                "status": False
+                "status": False,
+                "detail": "Ошибка при удалении"
             })
 
 
 class CartDeleteView(APIView):
     def post(self, request,pk=None):
-
+        if request.user.is_authenticated:
+            print(len(Cart.objects.filter(user=self.request.user)))
+            try:
+                cart = Cart.objects.get(user=self.request.user)
+            except:
+                cart = Cart.objects.create(user=self.request.user)
+                cart.save()
+        else:
+            try:
+               cart = Cart.objects.get(device_token=request.data['device_token'])
+            except:
+                cart = Cart.objects.create(device_token=request.data['device_token'])
+                cart.save()
         try:
-            user_cart = Cart.objects.get(user=self.request.user)
-
-            CartItem.objects.filter(cart=user_cart).delete()
-
+            CartItem.objects.filter(cart=cart).delete()
             return Response({
                 "status": True
             })
