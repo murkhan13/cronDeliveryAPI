@@ -503,6 +503,7 @@ class CartItemDeleteView(APIView):
                 cart = Cart.objects.create(device_token=request.data['device_token'])
                 cart.save()
         try:
+
             cartitem = CartItem.objects.filter(
                 pk=request.data['cartitem_id']
             ).filter(cart=cart)
@@ -511,7 +512,7 @@ class CartItemDeleteView(APIView):
                 "status": False,
                 "detail": "Товар по такому id не найден"
             })
-        if cartitem.exist():
+        if cartitem.exists():
             try:
                 cartitem.delete()
                 return Response({
