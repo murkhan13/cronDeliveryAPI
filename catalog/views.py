@@ -431,7 +431,6 @@ class CartItemEditView(APIView):
             cartitem = CartItem.objects.filter(
                 pk=request.data['cartitem_id']
             ).filter(cart=cart).first()
-
             quantity = int(request.data['quantity'])
         except Exception as e:
             print(e)
@@ -439,7 +438,6 @@ class CartItemEditView(APIView):
                 'status': False ,
                 'detail': "Ошибка запроса при изменении товаров в корзине"
             })
-
         try:
             additives = DishAdditive.objects.get(
                 id=request.data['additives_id']
