@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='restaurant',
-            field=models.CharField(default=None, max_length=200, verbose_name='Ресторан'),
+            field=models.CharField(default='нет', max_length=200, verbose_name='Ресторан'),
         ),
     ]
