@@ -107,6 +107,7 @@ class Restaurant(models.Model):
     freeOrder       = models.IntegerField(("Бесплатная доставка с суммы заказа от:"))
     address         = models.CharField(("Адрес ресторана"),max_length = 200)
     delivery        = models.IntegerField(("Стоимость доставки"))
+    deliveryTime    = models.IntegerField(("Среднее время доставки(мин)"), default=60)
     maxDeliverDist  = models.IntegerField(("Максимальное расстояние для доставки(km)"), default=20)
     info            = models.CharField(("Информация о ресторане"),max_length=200, help_text='Информация')
     # sumOfPoints sums everytime user give a feedback with point
