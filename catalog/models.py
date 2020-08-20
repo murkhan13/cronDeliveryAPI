@@ -121,7 +121,7 @@ class Restaurant(models.Model):
     # categories = models.(Category, related_name = 'categories', on_delete=models.SET_NULL, null = True)
     latitude        = models.FloatField(("Широта"), blank=True, null=True)
     longitude       = models.FloatField(("Долгота"), blank=True, null=True)
-    likedUsers      = models.ManyToManyField(User, related_name="favoriteRestaurants", blank=True, null=True)
+    likedUsers      = models.ManyToManyField(User, related_name="favoriteRestaurants")
 
     class Meta:
         verbose_name_plural = "Ресторан"
