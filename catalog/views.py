@@ -602,7 +602,7 @@ class FavoriteRestaurantsView(APIView):
                 "detail": "Ошибка при удалении ресторана из списка любимых."
             })
         restaurant = Restaurant.objects.get(title=restaurant_title)
-        restaurant.likedUser.remove(restaurant)
+        restaurant.likedUsers.remove(restaurant)
 
         return Response({
             "status": True,
