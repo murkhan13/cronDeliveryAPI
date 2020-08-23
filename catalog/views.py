@@ -595,7 +595,7 @@ class FavoriteRestaurantsView(APIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            restaurant_title = request.data.get('restaurant_title')
+            restaurant_title = self.request.DELETE('restaurant_title')
         except:
             return Response({
                 "status": False,
