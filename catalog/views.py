@@ -577,6 +577,7 @@ class FavoriteRestaurantsView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             restaurant_title = request.data.get('restaurant_title')
+            print(request.method)
         except:
             return Response({
                 'status': False,
@@ -594,13 +595,13 @@ class FavoriteRestaurantsView(APIView):
 
 
     def delete(self, request, *args, **kwargs):
-        # try:
-        restaurant_title = request.data.get('restaurant_title')
-        # except:
-        #     return Response({
-        #         "status": False,
-        #         "detail": "Ошибка при удалении ресторана из списка любимых."
-        #     })
+        try:
+            restaurant_title = self.request.GET['restaurant_title']
+        except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при удалении ресторана из списка любимых."
+            })
         restaurant = Restaurant.objects.get(title=restaurant_title)
         restaurant.likedUsers.remove(self.request.user)
 
