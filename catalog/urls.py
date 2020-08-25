@@ -9,6 +9,7 @@ urlpatterns = [
     path('find-in-restaurant/', SearchInRestaurantView.as_view()),
     path('restaurants/', RestaurantView.as_view()),
     path('find-all/', GlobalSearchView.as_view()),
+    path('find-dish/', DishSearch.as_view()),
     # path('restaurants/<int:pk>', RestaurantMenuView.as_view()),
     path('restaurants/menu/', RestaurantMenuView.as_view()),
     path('favorite-restaurants/', FavoriteRestaurantsView.as_view() ),

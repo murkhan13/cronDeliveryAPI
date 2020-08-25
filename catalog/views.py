@@ -104,44 +104,35 @@ class GlobalSearchView(APIView):
                 # filtering given categories query for particular dishes,
                 # and exclude categories with other names
                 # restaurant_obj = Restaurant.objects.get(title=restaurant_title)
-
+                '''
                 queryset = RestaurantMenu.objects.prefetch_related(
                     Prefetch('categories', queryset=Category.objects.prefetch_related(
                         Prefetch('dishes', queryset=Dish.objects.filter(title__icontains=search_term), to_attr='filtered_dishes')
                     ).filter(name__in=category_names), to_attr='filtered_categories')
                 ).filter(categories__name__in = category_names)
 
-                serializer = GlobalSearchSerializer(queryset, many=True, context={'request': request})
+                serializer = GlobalSearchSerializer(queryset, many=True, context={'request': request})'''
 
-                dishes = Dish.objects.filter(title__icontains=search_term).filter(category__name__icontains=search_term)
-                dishes_qs = []
+                dishes = Dish.objects.filter(title__icontains=search_term, category__name=search_term)
+                dishes = Dish.objects.filter(
+                    Q(title__icontains=search_term) |
+                    Q(category__name__icontains=search_term)
+                )
                 categories_qs = []
                 for category in Category.objects.all():
                     for dish in dishes:
                         if category in dish.category.all():
-                            dishes_qs.append(dish)
                             categories_qs.append(category)
-                            # print(dish, category)
                 final_list = []
-                for cat in categories_qs:
-                    restaurantmenu_qs = RestaurantMenu.objects.filter(categories=category)
-                    # restaurant_ser = GlobalSearchSerializer(restaurant_qs, many=True, context={'request': request})
+                restaurantmenu_qs = RestaurantMenu.objects.filter(categories__in=categories_qs)
                 for restaurantmenu in restaurantmenu_qs:
                     categorees = restaurantmenu.categories.all()
-                    for category in categorees:
-                        print(category)
                     rest_dict = {}
-                    print(restaurantmenu.restaurant.title)
                     restaurant_qs = Restaurant.objects.filter(title=restaurantmenu.restaurant.title)
                     restaurant_dishes = Dish.objects.filter(title__icontains=search_term, category__in=categorees)
                     rest_dict['restaurant'] = RestaurantDetailSerializer(restaurant_qs, many=True, context={'request':request}).data[0]
                     rest_dict['dishes'] = DishDetailSerializer(restaurant_dishes, many=True, context={'request':request}).data
-                    print(rest_dict)
                     final_list.append(rest_dict)
-                    print(restaurant_dishes)
-                    print(restaurantmenu.restaurant)
-                final_json = {}
-                final_json['dishes'] = DishDetailSerializer(dishes_qs, many=True, context={'request':request}).data
 
                 return Response(final_list)
             else:
@@ -154,6 +145,18 @@ class GlobalSearchView(APIView):
                 "status": False,
                 "detail": "Ничего не найдено."
             })
+
+class DishSearch(APIView):
+    permission_classes = [AllowAny, ]
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantDetailSerializer
+
+    def get(self, request, *args, **kwargs):
+        search_term = self.request.GET['search']
+        dish_qs = Dish.objects.filter(title__icontains=search_term)
+        serializer = DishDetailSerializer(dish_qs, many=True)
+
+        return Response(serializer.data)
 
 class RestaurantView(ListModelMixin, GenericAPIView):
     permission_classes = [AllowAny, ]
