@@ -46,9 +46,20 @@ class OrderView(APIView):
         serializer = OrderSerializer(user_orders, many=True)
         return Response(serializer.data)
 
+    def get(self, request, *args, **kwargs):
+        try:
+            orders = Order.objects.filter(user=self.request.user)
+            serializer = OrderSerializer(orders, many=True, context={'request': request})
+
+            return Response(serializer.data)
+        except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при получении заказов пользователя"
+            })
+
 
     def post(self, request, pk=None):
-
         try:
             purchaser_id = self.request.user.id
             purchaser = User.objects.get(id=purchaser_id)
@@ -98,6 +109,36 @@ class OrderView(APIView):
         serializer = OrderSerializer(user_order, many=True)
 
         return Response(serializer.data)
+
+
+class RepeatOrderView(APIView):
+    serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self, request,*args,**kwargs):
+        try:
+            order = Order.objects.get(pk=request.data['order_id'], user=self.request)
+        except Order.DoesNotExist:
+            return Response({
+                "status": False,
+                "detail": "Такого заказа не существует"
+            })
+        repeated_order = Order.objects.create(
+            user=self.request.user,
+            phone=order.phone,
+            total=order.total,
+            deliverTo=order.deliverTo,
+            address = order.address,
+            comment = order.comment,
+            personsAmount=order.personsAmount,
+            paymentMode=order.paymentMode
+        )
+        for order_item in order.order_items.all():
+            order_item.pk = None
+            order_item.save()
+            order_item.order = repeated_order
+            order_item.save()
 
 
 class OrderSingleView(RetrieveAPIView):

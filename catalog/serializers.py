@@ -148,7 +148,7 @@ class RestaurantMenuSerializer(serializers.ModelSerializer):
 class GlobalSearchSerializer(serializers.ModelSerializer):
     # categories = CategoryItemsSerializer(source='filtered_categories', many=True, read_only=True)
 
-    categories = CategoryItemsSearchSerializer(source='filtered_categories', many=True, read_only=True)
+    # categories = CategoryItemsSearchSerializer(source='filtered_categories', many=True, read_only=True)
     restaurant = RestaurantDetailSerializer(read_only=True)
 
     class Meta:
