@@ -112,25 +112,38 @@ class GlobalSearchView(APIView):
                 ).filter(categories__name__in = category_names)
 
                 serializer = GlobalSearchSerializer(queryset, many=True, context={'request': request})
+
                 dishes = Dish.objects.filter(title__icontains=search_term).filter(category__name__icontains=search_term)
-                d_qs = []
+                dishes_qs = []
                 categories_qs = []
                 for category in Category.objects.all():
                     for dish in dishes:
                         if category in dish.category.all():
-                            d_qs.append(dish)
+                            dishes_qs.append(dish)
                             categories_qs.append(category)
-                            print(dish, category)
+                            # print(dish, category)
+                final_list = []
                 for cat in categories_qs:
-                    restaurant_qs = RestaurantMenu.objects.filter(categories=category).first()
-                    restaurant_ser = RestaurantDetailSerializer(restaurant_qs.restaurant, many=True, context={'request': request})
+                    restaurantmenu_qs = RestaurantMenu.objects.filter(categories=category)
+                    # restaurant_ser = GlobalSearchSerializer(restaurant_qs, many=True, context={'request': request})
+                for restaurantmenu in restaurantmenu_qs:
+                    categorees = restaurantmenu.categories.all()
+                    for category in categorees:
+                        print(category)
+                    rest_dict = {}
+                    print(restaurantmenu.restaurant.title)
+                    restaurant_qs = Restaurant.objects.filter(title=restaurantmenu.restaurant.title)
+                    restaurant_dishes = Dish.objects.filter(title__icontains=search_term, category__in=categorees)
+                    rest_dict['restaurant'] = RestaurantDetailSerializer(restaurant_qs, many=True, context={'request':request}).data[0]
+                    rest_dict['dishes'] = DishDetailSerializer(restaurant_dishes, many=True, context={'request':request}).data
+                    print(rest_dict)
+                    final_list.append(rest_dict)
+                    print(restaurant_dishes)
+                    print(restaurantmenu.restaurant)
                 final_json = {}
-                final_json['dishes'] = DishDetailSerializer(d_qs, many=True, context={'request':request}).data
-                final_json['restaurant'] = restaurant_ser.data
-                # dishes_qs = Dish.objects.filter(title__icontains=search_term).filter(category__name__icontains=search_term)
-                # search_qs = RestaurantMenu.objects.filter(categor)
+                final_json['dishes'] = DishDetailSerializer(dishes_qs, many=True, context={'request':request}).data
 
-                return Response(final_json)
+                return Response(final_list)
             else:
                 return Response({
                     'status': False,

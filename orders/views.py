@@ -118,7 +118,7 @@ class RepeatOrderView(APIView):
 
     def post(self, request,*args,**kwargs):
         try:
-            order = Order.objects.get(pk=request.data['order_id'], user=self.request)
+            order = Order.objects.get(pk=request.data['order_id'], user=self.request.user)
         except Order.DoesNotExist:
             return Response({
                 "status": False,
@@ -150,7 +150,7 @@ class OrderSingleView(RetrieveAPIView):
     """
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
 
 
 class AddressView(APIView):
