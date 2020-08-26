@@ -5,6 +5,7 @@ from rest_framework.mixins import ListModelMixin
 from .serializers import *
 from .models import *
 from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from itertools import chain
 from django.db.models import Prefetch, Q, FilteredRelation
 from cronProjectAPI.settings import ALLOWED_HOSTS
@@ -89,9 +90,11 @@ class GlobalSearchView(APIView):
     """
     permission_classes = [AllowAny, ]
 
+
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']
+            page = self.request.GET['page']
             if search_term != '':
                 # restaurant_title = self.request.GET['rest_title']
                 print("search:", search_term)
@@ -113,7 +116,6 @@ class GlobalSearchView(APIView):
 
                 serializer = GlobalSearchSerializer(queryset, many=True, context={'request': request})'''
 
-                dishes = Dish.objects.filter(title__icontains=search_term, category__name=search_term)
                 dishes = Dish.objects.filter(
                     Q(title__icontains=search_term) |
                     Q(category__name__icontains=search_term)
@@ -130,6 +132,15 @@ class GlobalSearchView(APIView):
                     rest_dict = {}
                     restaurant_qs = Restaurant.objects.filter(title=restaurantmenu.restaurant.title)
                     restaurant_dishes = Dish.objects.filter(title__icontains=search_term, category__in=categorees)
+                    paginator = Paginator(restaurant_dishes, 2)
+                    try:
+                        restaurant_dishes = paginator.page(page)
+                    except PageNotAnInteger:
+                        # If page is not an integer, deliver first page.
+                        restaurant_dishes = paginator.page(1)
+                    except EmptyPage:
+                        # If page is out of range (e.g. 9999), deliver last page of results.
+                        restaurant_dishes = paginator.page(paginator.num_pages)
                     rest_dict['restaurant'] = RestaurantDetailSerializer(restaurant_qs, many=True, context={'request':request}).data[0]
                     rest_dict['dishes'] = DishDetailSerializer(restaurant_dishes, many=True, context={'request':request}).data
                     final_list.append(rest_dict)
@@ -145,18 +156,6 @@ class GlobalSearchView(APIView):
                 "status": False,
                 "detail": "Ничего не найдено."
             })
-
-class DishSearch(APIView):
-    permission_classes = [AllowAny, ]
-    queryset = Restaurant.objects.all()
-    serializer_class = RestaurantDetailSerializer
-
-    def get(self, request, *args, **kwargs):
-        search_term = self.request.GET['search']
-        dish_qs = Dish.objects.filter(title__icontains=search_term)
-        serializer = DishDetailSerializer(dish_qs, many=True)
-
-        return Response(serializer.data)
 
 class RestaurantView(ListModelMixin, GenericAPIView):
     permission_classes = [AllowAny, ]
