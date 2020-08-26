@@ -165,7 +165,6 @@ class AddressView(APIView):
     """
 
     serializer_class = AddressSerializer
-    qyeryset = Order.objects.all()
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -225,6 +224,25 @@ class AddressView(APIView):
                 "status": False
             })
 
+    def delete(self, request, *args, **kwargs):
+        try:
+            address_id = self.request.GET['address_id']
+        except:
+            return Response({
+                "status": False,
+                "detail": "Ошибка при удалении адреса."
+            })
+        try:
+            Address.objects.filter(id=address_id,user=self.request.user).delete()
+            return Response({
+                "status": True,
+                "detail": "Адрес удалён."
+            })
+        except:
+            return Response({
+                "status": False,
+                "detail": "Адрес не найден"
+            })
 
 class UserProfileView(APIView):
     """

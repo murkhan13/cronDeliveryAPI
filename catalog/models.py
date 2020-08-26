@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from accounts.models import User
 from orders.models import Order
+from PIL import Image
 
 
 class Category(models.Model):
@@ -45,6 +46,15 @@ class Dish(models.Model):
 
     class Meta:
         verbose_name_plural = "Блюда"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = Image.open(self.image.path)
+
+        if img.height > 500 or img.width > 500:
+            output_size = (500, 500)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
 
     def get_image_url(self, obj):
         return obj.image.url
