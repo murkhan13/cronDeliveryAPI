@@ -80,6 +80,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'id',
             'user',
             'phone',
+            'total',
             'personsAmount',
             'orderStatus',
             'paymentMode',

@@ -25,7 +25,7 @@ def send_sms(phone, key):
     print(phone)
     login = 'CronApp'
     password = 'croncron'
-    message = "DeliveryAPPCode:"
+    message = "DeliveryAPPCode - код подтверждения:"
     message += str(key) # DeliveryAPPCode:key
     link = "http://smsc.ru/sys/send.php?login=%s&psw=%s&phones=%s&mes=%s" % (login, password, phone, message)
     print(link)
@@ -244,9 +244,9 @@ class ChangePhone(APIView):
         user_phone = request.data.get('phone', False)
         otp_sent = request.data.get('otp', False)
         if user_phone:
-            phone_toSMS = user_phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
+            # phone_toSMS = user_phone.replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
             phone = str(user_phone)
-            old = PhoneOTP.objects.filter(phone__iexact = phone_toSMS)
+            old = PhoneOTP.objects.filter(phone__iexact = phone)
             if old.exists():
                 old = old.first()
                 otp = old.otp

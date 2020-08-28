@@ -1,13 +1,13 @@
 from django.urls import path, include, re_path
 from .views import *
-from knox import views as knox_views 
+from knox import views as knox_views
 
 app_name = 'accounts'
 
 
 urlpatterns = [
     re_path(r'^validate_phone/', ValidatePhoneSendOTP.as_view()),
-    re_path("^auth/$", ValidateOtpAndAuthenticate.as_view()), 
+    re_path("^auth/$", ValidateOtpAndAuthenticate.as_view()),
     re_path(r'^set_name/', SetUserName.as_view()),
     re_path(r'^change_phone', ChangePhone.as_view()),
     re_path("^logout/$", LogoutView.as_view())

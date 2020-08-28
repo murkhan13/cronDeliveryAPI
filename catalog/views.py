@@ -94,7 +94,8 @@ class GlobalSearchView(APIView):
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']
-            page = self.request.GET['page']
+            page = self.request.GET.getlist('page', 1)
+            print(page)
             if search_term != '':
                 # restaurant_title = self.request.GET['rest_title']
                 print("search:", search_term)
