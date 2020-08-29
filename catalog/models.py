@@ -51,8 +51,8 @@ class Dish(models.Model):
         super().save(*args, **kwargs)
         img = Image.open(self.image.path)
 
-        if img.height > 500 or img.width > 500:
-            output_size = (500, 500)
+        if img.height > 600 or img.width > 600:
+            output_size = (600, 600)
             img.thumbnail(output_size)
             img.save(self.image.path)
 
