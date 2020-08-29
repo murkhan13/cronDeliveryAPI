@@ -94,8 +94,7 @@ class GlobalSearchView(APIView):
     def get(self, request, *args, **kwargs):
         if 'search' in self.request.GET:
             search_term = self.request.GET['search']
-            page = self.request.GET.getlist('page', 1)
-            print(page)
+            page = self.request.GET['page'] #.getlist('page', 1)
             if search_term != '':
                 # restaurant_title = self.request.GET['rest_title']
                 print("search:", search_term)
@@ -128,24 +127,19 @@ class GlobalSearchView(APIView):
                             categories_qs.append(category)
                 final_list = []
                 restaurantmenu_qs = RestaurantMenu.objects.filter(categories__in=categories_qs)
+                paginator = Paginator(restaurantmenu_qs, 10)
+                restaurantmenu_qs = paginator.page(page)
+                pagination_dict = {}
+                pagination_dict["pagination"] = {"param": "page", "count": paginator.num_pages, "current": int(page), "rows": 10}
                 for restaurantmenu in restaurantmenu_qs:
                     categorees = restaurantmenu.categories.all()
                     rest_dict = {}
                     restaurant_qs = Restaurant.objects.filter(title=restaurantmenu.restaurant.title)
                     restaurant_dishes = Dish.objects.filter(title__icontains=search_term, category__in=categorees)
-                    paginator = Paginator(restaurant_dishes, 2)
-                    try:
-                        restaurant_dishes = paginator.page(page)
-                    except PageNotAnInteger:
-                        # If page is not an integer, deliver first page.
-                        restaurant_dishes = paginator.page(1)
-                    except EmptyPage:
-                        # If page is out of range (e.g. 9999), deliver last page of results.
-                        restaurant_dishes = paginator.page(paginator.num_pages)
                     rest_dict['restaurant'] = RestaurantDetailSerializer(restaurant_qs, many=True, context={'request':request}).data[0]
                     rest_dict['dishes'] = DishDetailSerializer(restaurant_dishes, many=True, context={'request':request}).data
                     final_list.append(rest_dict)
-
+                final_list.append(pagination_dict)
                 return Response(final_list)
             else:
                 return Response({
