@@ -133,10 +133,10 @@ class GlobalSearchView(APIView):
                 pagination_dict = {}
                 pagination_dict["pagination"] = {"param": "page", "count": paginator.num_pages, "current": int(page), "rows": 10}
                 for restaurantmenu in restaurantmenu_qs:
-                    restaurantmenu = restaurantmenu
+                    title = restaurantmenu.restaurant.title
                     categorees = restaurantmenu.categories.all()
                     rest_dict = {}
-                    restaurant_qs = Restaurant.objects.filter(title=restaurantmenu.restaurant.title)
+                    restaurant_qs = Restaurant.objects.filter(title=title)
                     restaurant_dishes = Dish.objects.filter(title__icontains=search_term, category__in=categorees)
                     rest_dict['restaurant'] = RestaurantDetailSerializer(restaurant_qs, many=True, context={'request':request}).data[0]
                     rest_dict['dishes'] = DishDetailSerializer(restaurant_dishes, many=True, context={'request':request}).data
