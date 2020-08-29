@@ -133,6 +133,7 @@ class GlobalSearchView(APIView):
                 pagination_dict = {}
                 pagination_dict["pagination"] = {"param": "page", "count": paginator.num_pages, "current": int(page), "rows": 10}
                 for restaurantmenu in restaurantmenu_qs:
+                    restaurantmenu = restaurantmenu
                     categorees = restaurantmenu.categories.all()
                     rest_dict = {}
                     restaurant_qs = Restaurant.objects.filter(title=restaurantmenu.restaurant.title)
