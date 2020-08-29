@@ -127,7 +127,7 @@ class GlobalSearchView(APIView):
                             if category not in categories_qs:
                                 categories_qs.append(category)
                 final_list = []
-                restaurantmenu_qs = RestaurantMenu.objects.filter(categories__in=categories_qs).distinct()
+                restaurantmenu_qs = RestaurantMenu.objects.filter(categories__in=categories_qs)
                 paginator = Paginator(restaurantmenu_qs, 10)
                 restaurantmenu_qs = paginator.page(page)
                 pagination_dict = {}
